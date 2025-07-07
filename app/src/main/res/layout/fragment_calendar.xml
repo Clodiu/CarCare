@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".HomeFragment"
+    android:background="@color/background_tint_color"
+    android:backgroundTint="@color/background_tint_color">
+
+    <!-- TODO: Update blank fragment layout -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="@color/primary_tint_color"
+        android:id="@+id/card_calendar_view">
+
+        <com.applandeo.materialcalendarview.CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:headerColor="@color/primary_tint_color"
+            app:headerLabelColor="@color/white"
+            app:abbreviationsBarColor="@color/primary_tint_color"
+            app:abbreviationsLabelsColor="@color/white"
+            app:pagesColor="@color/primary_tint_color"
+            app:daysLabelsColor="@color/white"
+            app:todayLabelColor="@color/yellow"
+            app:highlightedDaysLabelsColor="@color/dodgerBlue"
+            android:layout_margin="10dp"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_notes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/card_calendar_view">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+</RelativeLayout>
