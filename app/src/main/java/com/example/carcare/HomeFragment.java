@@ -1,5 +1,7 @@
 package com.example.carcare;
 
+import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -7,9 +9,18 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 
@@ -20,11 +31,18 @@ import java.util.ArrayList;
  */
 public class HomeFragment extends Fragment {
 
+    private TextInputEditText searchEditText;
+
     private RecyclerView recyclerView;
 
     private NoteList_RecyclerViewAdapter adapter;
 
     private ArrayList<Note> carNotes = new ArrayList<>();
+
+    private RelativeLayout mainLayout;
+
+    private Handler handler = new Handler();
+    private Runnable searchRunnable;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -71,11 +89,15 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        mainLayout = view.findViewById(R.id.main);
         recyclerView = view.findViewById(R.id.recycler_view_notes);
+        searchEditText = view.findViewById(R.id.search_edit_text);
         setUpCarNotes();
         adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        initSearch();
+        initNoFocusSearchbarWhenNoKeyboard();
 
         return view;
     }
@@ -85,4 +107,65 @@ public class HomeFragment extends Fragment {
             carNotes.add(new Note());
         }
     }
+
+    private void initSearch() {
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Oprește runnable-ul anterior dacă tastează din nou rapid
+                if (searchRunnable != null) {
+                    handler.removeCallbacks(searchRunnable);
+                }
+
+                //Setează runnable-ul cu delay
+                searchRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getContext(), "Cauți: " + s.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                };
+
+                handler.postDelayed(searchRunnable, 300); // 500 ms delay
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+    }
+
+    private void initNoFocusSearchbarWhenNoKeyboard(){
+        mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private int previousHeightDiff = 0;
+
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                mainLayout.getWindowVisibleDisplayFrame(r);
+                int screenHeight = mainLayout.getRootView().getHeight();
+
+                int heightDiff = screenHeight - r.height();
+
+                if (previousHeightDiff > heightDiff) {
+                    // Tastatura s-a închis
+                    InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    if (searchEditText.hasFocus()) {
+                        searchEditText.clearFocus();
+                        if (imm != null) {
+                            imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+                        }
+                    }
+                }
+                previousHeightDiff = heightDiff;
+            }
+        });
+    }
+
+
 }
