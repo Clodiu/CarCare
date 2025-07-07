@@ -20,9 +20,9 @@
         android:tooltipText=""/>
 
     <item
-        android:id="@+id/finance"
-        android:title="Finance"
-        android:icon="@drawable/paid_icon_24dp"
+        android:id="@+id/ai_pic"
+        android:title="Ai Picture"
+        android:icon="@drawable/photo_icon_24dp"
         android:tooltipText=""/>
 
     <item

@@ -40,7 +40,12 @@
         android:id="@+id/recycler_view_notes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/card_calendar_view">
+        android:layout_below="@+id/card_calendar_view"
+        android:layout_marginTop="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 

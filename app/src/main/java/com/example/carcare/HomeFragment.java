@@ -2,11 +2,16 @@ package com.example.carcare;
 
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +19,12 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
+
+    private RecyclerView recyclerView;
+
+    private NoteList_RecyclerViewAdapter adapter;
+
+    private ArrayList<Note> carNotes = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -58,7 +69,20 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        recyclerView = view.findViewById(R.id.recycler_view_notes);
+        setUpCarNotes();
+        adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        return view;
+    }
+
+    private void setUpCarNotes(){
+        for(int i = 1 ; i <= 20 ; i++){
+            carNotes.add(new Note());
+        }
     }
 }

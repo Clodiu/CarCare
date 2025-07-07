@@ -2,11 +2,14 @@ package com.example.carcare;
 
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -96,7 +99,6 @@ public class CalendarFragment extends Fragment {
         adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
 
         setUpHighlightedDays();
         setOnDayClick();

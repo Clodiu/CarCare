@@ -55,7 +55,7 @@ public class CarHistoryActivity extends AppCompatActivity {
             } else if (id == R.id.calendar) {
                 viewPager.setCurrentItem(1, true);
                 return true;
-            } else if (id == R.id.finance) {
+            } else if (id == R.id.ai_pic) {
                 viewPager.setCurrentItem(2, true);
                 return true;
             } else if (id == R.id.settings) {
@@ -77,7 +77,7 @@ public class CarHistoryActivity extends AppCompatActivity {
                         bottomNavigationView.setSelectedItemId(R.id.calendar);
                         break;
                     case 2:
-                        bottomNavigationView.setSelectedItemId(R.id.finance);
+                        bottomNavigationView.setSelectedItemId(R.id.ai_pic);
                         break;
                     case 3:
                         bottomNavigationView.setSelectedItemId(R.id.settings);

@@ -33,6 +33,7 @@ public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_
     public void onBindViewHolder(@NonNull NoteList_RecyclerViewAdapter.MyViewHolder holder, int position) {
         holder.noteTitle.setText(carNotes.get(position).getTitle());
         holder.notePrice.setText(carNotes.get(position).getPrice());
+        holder.noteDate.setText(carNotes.get(position).getDate());
     }
 
     @Override
@@ -41,13 +42,15 @@ public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView noteTitle, notePrice;
+        TextView noteTitle, notePrice, noteDate;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
             noteTitle = itemView.findViewById(R.id.note_title);
             notePrice = itemView.findViewById(R.id.note_price);
+            noteDate = itemView.findViewById(R.id.note_date);
+
         }
     }
 }
