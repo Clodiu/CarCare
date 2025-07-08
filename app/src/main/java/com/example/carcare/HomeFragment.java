@@ -1,6 +1,7 @@
 package com.example.carcare;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -29,7 +30,7 @@ import java.util.ArrayList;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
 
     private TextInputEditText searchEditText;
 
@@ -93,7 +94,7 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view_notes);
         searchEditText = view.findViewById(R.id.search_edit_text);
         setUpCarNotes();
-        adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes);
+        adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         initSearch();
@@ -168,4 +169,10 @@ public class HomeFragment extends Fragment {
     }
 
 
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(getContext(), "Ai apasat din home fragment boss", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getContext(), NoteViewActivity.class);
+        startActivity(intent);
+    }
 }

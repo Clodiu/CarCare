@@ -3,13 +3,13 @@ package com.example.carcare;
 public class Note {
     String title;
     String description;
-    String price;
+    int km;
     String date;
 
     public Note(){
         this.title = "Nimic";
         this.description = "No description";
-        this.price = "600Lei";
+        this.km = 128000;
         this.date = "Last serviced: 01-01-2002";
     }
 
@@ -21,8 +21,8 @@ public class Note {
         return description;
     }
 
-    public String getPrice() {
-        return price;
+    public int getKm() {
+        return km;
     }
 
     public String getDate() {

@@ -1,5 +1,6 @@
 package com.example.carcare;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CalendarFragment extends Fragment {
+public class CalendarFragment extends Fragment implements NoteRecyclerViewInterface{
 
     private CalendarView calendarView;
     private RecyclerView recyclerView;
@@ -96,7 +97,7 @@ public class CalendarFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recycler_view_notes);
         setUpCarNotes();
-        adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes);
+        adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -163,5 +164,10 @@ public class CalendarFragment extends Fragment {
     }
 
 
-
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(getContext(), "Ai apasat din calendar fragment boss", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(getContext(), NoteViewActivity.class);
+        startActivity(intent);
+    }
 }

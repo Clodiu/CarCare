@@ -29,7 +29,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.Calendar;
 import java.util.Date;
 
-public class CarHistoryActivity extends AppCompatActivity {
+public class CarHistoryActivity extends AppCompatActivity{
 
     private DatePickerDialog datePickerDialog;
     private Button dateButton;

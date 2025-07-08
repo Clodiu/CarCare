@@ -2,6 +2,7 @@ package com.example.carcare;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,7 +30,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 
-public class CarListActivity extends AppCompatActivity {
+public class CarListActivity extends AppCompatActivity implements CarRecyclerViewInterface{
 
     private TextInputEditText searchEditText;
     private TextInputEditText manufacturerEditText;
@@ -39,6 +40,8 @@ public class CarListActivity extends AppCompatActivity {
     private RelativeLayout mainLayout;
     private RecyclerView recyclerView;
     private FloatingActionButton addButton;
+
+    private FloatingActionButton logoutButton;
     private CardView addCar;
 
     CarList_RecyclerViewAdapter adapter;
@@ -70,10 +73,11 @@ public class CarListActivity extends AppCompatActivity {
         registerPlateEditText = findViewById(R.id.register_plate_input_text);
         saveButton = findViewById(R.id.save_button);
         addCar = findViewById(R.id.add_car_card_view);
+        logoutButton = findViewById(R.id.button_logout);
 
         setUpUserCars();
 
-        adapter = new CarList_RecyclerViewAdapter(this, userCars);
+        adapter = new CarList_RecyclerViewAdapter(this, userCars, this);
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -82,6 +86,7 @@ public class CarListActivity extends AppCompatActivity {
         initNoFocusSearchbarWhenNoKeyboard();
         setUpAddButton();
         setUpSaveButton();
+        setUpLogoutButton();
 
 
     }
@@ -132,6 +137,16 @@ public class CarListActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void setUpLogoutButton(){
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(CarListActivity.this, "Ai apasat pe butonul de log out", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 
     //Metoda care seteaza implicit niste masini
     private void setUpUserCars(){
@@ -221,5 +236,11 @@ public class CarListActivity extends AppCompatActivity {
                 previousHeightDiff = heightDiff;
             }
         });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent intent = new Intent(CarListActivity.this, CarHistoryActivity.class);
+        startActivity(intent);
     }
 }

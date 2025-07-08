@@ -169,13 +169,13 @@
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_delete"
+        android:id="@+id/button_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_margin="24dp"
-        app:srcCompat="@drawable/delete_icon_24dp"
+        app:srcCompat="@drawable/logout_icon_24dp"
         app:backgroundTint="@color/primary_tint_color"
         app:tint = "@color/icon_tint_color"/>
 

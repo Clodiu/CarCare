@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".HomeFragment"
     android:background="@color/background_tint_color"
     android:backgroundTint="@color/background_tint_color">
@@ -13,5 +14,17 @@
         android:layout_height="wrap_content"
         android:text="Settings Fragment"
         android:layout_gravity="center"/>
+
+    <Button
+        android:id="@+id/delete_car"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/primary_tint_color"
+        android:text="Delete this car and all the notes related"
+        android:textColor="@color/button_text_color"
+        android:textSize="18sp"
+        app:cornerRadius="10dp"
+        android:layout_margin="15dp"/>
 
 </FrameLayout>

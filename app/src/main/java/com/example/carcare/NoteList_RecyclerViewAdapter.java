@@ -13,12 +13,15 @@ import java.util.ArrayList;
 
 public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_RecyclerViewAdapter.MyViewHolder> {
 
+    private final NoteRecyclerViewInterface recyclerViewInterface;
+
     private Context context;
     private ArrayList<Note> carNotes;
 
-    public NoteList_RecyclerViewAdapter(Context context, ArrayList<Note> carNotes){
+    public NoteList_RecyclerViewAdapter(Context context, ArrayList<Note> carNotes, NoteRecyclerViewInterface recyclerViewInterface){
         this.context = context;
         this.carNotes = carNotes;
+        this.recyclerViewInterface = recyclerViewInterface;
     }
 
     @NonNull
@@ -26,13 +29,13 @@ public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_
     public NoteList_RecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.notes_card_layout, parent,false);
-        return new NoteList_RecyclerViewAdapter.MyViewHolder(view);
+        return new NoteList_RecyclerViewAdapter.MyViewHolder(view, recyclerViewInterface);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NoteList_RecyclerViewAdapter.MyViewHolder holder, int position) {
         holder.noteTitle.setText(carNotes.get(position).getTitle());
-        holder.notePrice.setText(carNotes.get(position).getPrice());
+        holder.noteKm.setText("" + carNotes.get(position).getKm());
         holder.noteDate.setText(carNotes.get(position).getDate());
     }
 
@@ -42,14 +45,28 @@ public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView noteTitle, notePrice, noteDate;
+        TextView noteTitle, noteKm, noteDate;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public MyViewHolder(@NonNull View itemView, NoteRecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 
             noteTitle = itemView.findViewById(R.id.note_title);
-            notePrice = itemView.findViewById(R.id.note_price);
+            noteKm = itemView.findViewById(R.id.note_km);
             noteDate = itemView.findViewById(R.id.note_date);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(recyclerViewInterface != null){
+                        int pos = getAdapterPosition();
+
+                        if(pos != RecyclerView.NO_POSITION){
+                            recyclerViewInterface.onItemClick(pos);
+                        }
+                    }
+
+                }
+            });
 
         }
     }

@@ -13,12 +13,14 @@ import java.util.ArrayList;
 
 class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerViewAdapter.MyViewHolder> {
 
+    private final CarRecyclerViewInterface recyclerViewInterface;
     private Context context;
     private ArrayList<Car> userCars;
 
-    public CarList_RecyclerViewAdapter(Context context, ArrayList<Car> userCars){
+    public CarList_RecyclerViewAdapter(Context context, ArrayList<Car> userCars, CarRecyclerViewInterface recyclerViewInterface){
         this.context = context;
         this.userCars = userCars;
+        this.recyclerViewInterface = recyclerViewInterface;
     }
 
     @NonNull
@@ -27,7 +29,7 @@ class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerV
         //This is where you inflate the layout (Ginving a look to our rows)
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.car_card_layout, parent,false);
-        return new CarList_RecyclerViewAdapter.MyViewHolder(view);
+        return new CarList_RecyclerViewAdapter.MyViewHolder(view, recyclerViewInterface);
     }
 
     @Override
@@ -52,13 +54,27 @@ class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerV
 
         TextView carManufacturer, carModel, carPlate, carLastServiced;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public MyViewHolder(@NonNull View itemView, CarRecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 
             carManufacturer = itemView.findViewById(R.id.car_manufacturer);
             carModel = itemView.findViewById(R.id.car_model);
             carPlate = itemView.findViewById(R.id.car_register_plate);
             carLastServiced = itemView.findViewById(R.id.car_last_service);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(recyclerViewInterface != null){
+                        int pos = getAdapterPosition();
+
+                        if(pos != RecyclerView.NO_POSITION){
+                            recyclerViewInterface.onItemClick(pos);
+                        }
+                    }
+
+                }
+            });
         }
     }
 }
