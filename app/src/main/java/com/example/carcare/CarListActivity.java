@@ -28,10 +28,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CarListActivity extends AppCompatActivity implements CarRecyclerViewInterface{
 
+    int userId = 2;
     private TextInputEditText searchEditText;
     private TextInputEditText manufacturerEditText;
     private TextInputEditText modelEditText;
@@ -75,7 +84,8 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         addCar = findViewById(R.id.add_car_card_view);
         logoutButton = findViewById(R.id.button_logout);
 
-        setUpUserCars();
+        //setUpUserCars();
+        loadCarsFromDatabase();
 
         adapter = new CarList_RecyclerViewAdapter(this, userCars, this);
 
@@ -116,23 +126,54 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                 String model = modelEditText.getText().toString().trim();
                 String registerPlate = registerPlateEditText.getText().toString().trim();
 
-                String message = "Manufacturer: " + manufacturer + "\nModel: " + model + "\nRegister Plate: " + registerPlate;
+                if(!manufacturer.isEmpty() && !model.isEmpty() && !registerPlate.isEmpty()){
 
-                Toast.makeText(CarListActivity.this, message, Toast.LENGTH_LONG).show();
+                    ConnectionClass connectionClass = new ConnectionClass();
+                    Connection conn = connectionClass.CONN();
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.execute(() -> {
+                        try{
+                            if(conn == null){
 
-                manufacturerEditText.setText("");
-                modelEditText.setText("");
-                registerPlateEditText.setText("");
+                            }else{
+                                Statement stmt = conn.createStatement();
 
-                /*
+                                String query = "INSERT INTO Cars (Manufacturer,Model,RegisterPlate,LastServiced,Creator_ID) VALUES (?,?,?,?,?)";
+                                java.sql.PreparedStatement pstmt = conn.prepareStatement(query);
+                                pstmt.setString(1, manufacturer);
+                                pstmt.setString(2,model);
+                                pstmt.setString(3,registerPlate);
 
-                userCars.add(new Car(manufacturer,model,registerPlate,"never"));
+                                Calendar cal = Calendar.getInstance();
+                                cal.set(Calendar.YEAR, 2000);
+                                cal.set(Calendar.MONTH, Calendar.JANUARY);  // atenție: lunile sunt 0-based în Calendar
+                                cal.set(Calendar.DAY_OF_MONTH, 1);
 
-                adapter = new CarList_RecyclerViewAdapter(CarListActivity.this, userCars);
+                                Date sqlDate = new Date(cal.getTimeInMillis());
+
+                                pstmt.setDate(4,sqlDate);
+                                pstmt.setInt(5,userId);
+
+                                pstmt.executeUpdate();
+
+                                pstmt.close();
+                                conn.close();
+
+                                // După inserare, încarcă din nou datele pe thread-ul UI
+                                runOnUiThread(() -> loadCarsFromDatabase());
+
+                            }
+                        }catch (Exception e){
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+                loadCarsFromDatabase();
+
+
 
                 recyclerView.setAdapter(adapter);
                 recyclerView.setLayoutManager(new LinearLayoutManager(CarListActivity.this));
-                 */
 
             }
         });
@@ -243,4 +284,55 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         Intent intent = new Intent(CarListActivity.this, CarHistoryActivity.class);
         startActivity(intent);
     }
+
+    private void loadCarsFromDatabase(){
+        userCars.clear();
+        ConnectionClass connectionClass = new ConnectionClass();
+        Connection conn = connectionClass.CONN();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            Statement stmt = null;
+            ResultSet rs = null;
+            try{
+                if(conn == null){
+                    Toast.makeText(this,"Problema de conexiune",Toast.LENGTH_LONG).show();
+                }else{
+                    stmt = conn.createStatement();
+
+                    String query = "SELECT * FROM CarCareDB.dbo.Cars WHERE Creator_ID = "+userId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while (rs.next()) {
+                        int carId = rs.getInt("Car_ID");
+                        String manufacturer = rs.getString("Manufacturer");
+                        String model = rs.getString("Model");
+                        String registerPlate = rs.getString("RegisterPlate");
+                        int creatorId = rs.getInt("Creator_ID");
+
+                        userCars.add(new Car(carId,manufacturer,model,registerPlate, "Never",creatorId));
+                    }
+
+                    conn.close();
+
+                    // Actualizează UI pe thread-ul principal
+                    runOnUiThread(() -> {
+                        adapter.notifyDataSetChanged();
+                    });
+
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
 }
