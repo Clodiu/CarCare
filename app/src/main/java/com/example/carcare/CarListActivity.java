@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -40,7 +41,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CarListActivity extends AppCompatActivity implements CarRecyclerViewInterface{
 
-    int userId = 2;
+    private Button logOutButton;
+    private CardView settingsCardView;
+    private TextView usernameTextView;
+    private TextView emailTextView;
+    private int userId = 2;
     private TextInputEditText searchEditText;
     private TextInputEditText manufacturerEditText;
     private TextInputEditText modelEditText;
@@ -50,12 +55,13 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
     private RecyclerView recyclerView;
     private FloatingActionButton addButton;
 
-    private FloatingActionButton logoutButton;
+    private FloatingActionButton settingsButton;
     private CardView addCar;
 
     CarList_RecyclerViewAdapter adapter;
 
     private ArrayList<Car> userCars = new ArrayList<>();
+    private ArrayList<Car> filteredCars = new ArrayList<>();
 
     private Handler handler = new Handler();
     private Runnable searchRunnable;
@@ -82,7 +88,11 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         registerPlateEditText = findViewById(R.id.register_plate_input_text);
         saveButton = findViewById(R.id.save_button);
         addCar = findViewById(R.id.add_car_card_view);
-        logoutButton = findViewById(R.id.button_logout);
+        settingsButton = findViewById(R.id.button_settings);
+        logOutButton = findViewById(R.id.logout_button);
+        settingsCardView = findViewById(R.id.settings_card_view);
+        usernameTextView = findViewById(R.id.username_text_view);
+        emailTextView = findViewById(R.id.email_text_view);
 
         //setUpUserCars();
         loadCarsFromDatabase();
@@ -96,7 +106,9 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         initNoFocusSearchbarWhenNoKeyboard();
         setUpAddButton();
         setUpSaveButton();
-        setUpLogoutButton();
+        setUpSettingsButton();
+        setUpLogOutButton();
+        loadUserAndEmailFromDataBase();
 
 
     }
@@ -112,6 +124,9 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                 }else if(addCar.getVisibility() == View.INVISIBLE){
                     addCar.setVisibility(View.VISIBLE);
                     addButton.setImageResource(R.drawable.close_icon_24dp);
+                }
+                if(settingsCardView.getVisibility() == View.VISIBLE){
+                    settingsCardView.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -179,14 +194,32 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         });
     }
 
-    private void setUpLogoutButton(){
-        logoutButton.setOnClickListener(new View.OnClickListener() {
+    private void setUpSettingsButton(){
+        settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CarListActivity.this, "Ai apasat pe butonul de log out", Toast.LENGTH_LONG).show();
+                if(settingsCardView.getVisibility() == View.INVISIBLE){
+                    settingsCardView.setVisibility(View.VISIBLE);
+                }else if(settingsCardView.getVisibility() == View.VISIBLE){
+                    settingsCardView.setVisibility(View.INVISIBLE);
+                }
+                if(addCar.getVisibility() == View.VISIBLE){
+                    addCar.setVisibility(View.INVISIBLE);
+                    addButton.setImageResource(R.drawable.add_icon_24dp);
+                }
             }
         });
     }
+
+    private void setUpLogOutButton(){
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(CarListActivity.this, "Hello, this is a Toast!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
 
     //Metoda care seteaza implicit niste masini
@@ -214,7 +247,7 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                 searchRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(CarListActivity.this, "Cauți: " + s.toString(), Toast.LENGTH_SHORT).show();
+                        filterCars(s.toString());
                     }
                 };
 
@@ -229,6 +262,24 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
 
     }
 
+    private void filterCars(String query){
+        filteredCars.clear();
+        if (query.isEmpty()) {
+            filteredCars.addAll(userCars);  // dacă nu ai text, arată tot
+        } else {
+            for (Car car : userCars) {
+                if (car.getManufacturer().toLowerCase().contains(query.toLowerCase()) ||
+                        car.getModel().toLowerCase().contains(query.toLowerCase()) ||
+                        car.getRegisterPlate().toLowerCase().contains(query.toLowerCase())) {
+                    filteredCars.add(car);
+                }
+            }
+        }
+        runOnUiThread(() -> {
+            adapter.setCars(filteredCars);
+            adapter.notifyDataSetChanged();
+        });
+    }
     //Functia pentru scoaterea focusului cand tastatura nu este activa
     private void initNoFocusSearchbarWhenNoKeyboard(){
         mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -320,6 +371,46 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                         adapter.notifyDataSetChanged();
                     });
 
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void loadUserAndEmailFromDataBase(){
+        ConnectionClass connectionClass = new ConnectionClass();
+        Connection conn = connectionClass.CONN();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            Statement stmt = null;
+            ResultSet rs = null;
+            try{
+                if(conn == null){
+                    Toast.makeText(this,"Problema de conexiune",Toast.LENGTH_LONG).show();
+                }else{
+                    stmt = conn.createStatement();
+
+                    String query = "SELECT Name,Email FROM Users WHERE User_ID = "+userId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while (rs.next()) {
+                        String name = "Username: " + rs.getString("Name");
+                        String email = "Email: " + rs.getString("Email");
+
+                        usernameTextView.setText(name);
+                        emailTextView.setText(email);
+                    }
+                    conn.close();
                 }
             }catch (Exception e){
                 throw new RuntimeException(e);

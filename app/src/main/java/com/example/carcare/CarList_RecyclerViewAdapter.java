@@ -23,6 +23,10 @@ class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerV
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
+    public void setCars(ArrayList<Car> cars) {
+        this.userCars = cars;
+    }
+
     @NonNull
     @Override
     public CarList_RecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
