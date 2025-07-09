@@ -3,6 +3,7 @@ package com.example.carcare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,6 +79,9 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         });
 
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_tint_color));
+
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        userId = prefs.getInt("USER_ID", -1);
 
         mainLayout = findViewById(R.id.main);
         searchEditText = findViewById(R.id.search_edit_text);
@@ -174,7 +178,7 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                                 pstmt.close();
                                 conn.close();
 
-                                // După inserare, încarcă din nou datele pe thread-ul UI
+                                // Dupa inserare, incarca din nou datele pe thread-ul UI
                                 runOnUiThread(() -> loadCarsFromDatabase());
 
                             }
@@ -183,7 +187,6 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                         }
                     });
                 }
-                loadCarsFromDatabase();
 
 
 
@@ -215,7 +218,18 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(CarListActivity.this, "Hello, this is a Toast!", Toast.LENGTH_SHORT).show();
+                // Sterge USER_ID din SharedPreferences
+                SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.remove("USER_ID");
+                editor.apply();
+
+                // Navigheaza inapoi la AuthActivity
+                Intent intent = new Intent(CarListActivity.this, AuthActivity.class);
+                startActivity(intent);
+
+                // Inchide activitatea curenta ca sa nu mai poti reveni cu Back
+                finish();
             }
         });
     }
@@ -238,7 +252,7 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //Oprește runnable-ul anterior dacă tastează din nou rapid
+                //Opreste runnable-ul anterior dacă tastează din nou rapid
                 if (searchRunnable != null) {
                     handler.removeCallbacks(searchRunnable);
                 }

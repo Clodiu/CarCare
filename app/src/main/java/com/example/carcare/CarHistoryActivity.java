@@ -218,11 +218,11 @@ public class CarHistoryActivity extends AppCompatActivity{
 
                 int heightDiff = screenHeight - r.height();
 
-                // Dacă diferența e mare, înseamnă că tastatura e afișată
-                // Dacă diferența scade, tastatura s-a ascuns
+                // Dacă diferenta e mare, inseamna ca tastatura e afisata
+                // Dacă diferenta scade, tastatura s-a ascuns
                 if (previousHeightDiff > heightDiff) {
-                    // Tastatura tocmai s-a închis
-                    // Scoatem focusul și ascundem tastatura (de precauție)
+                    // Tastatura tocmai s-a inchis
+                    // Scoatem focusul si ascundem tastatura
                     if (titleEditText.hasFocus()) {
                         titleEditText.clearFocus();
                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
