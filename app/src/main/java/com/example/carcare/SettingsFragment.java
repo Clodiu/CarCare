@@ -1,5 +1,7 @@
 package com.example.carcare;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -8,7 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +27,21 @@ import android.widget.Toast;
  * create an instance of this fragment.
  */
 public class SettingsFragment extends Fragment {
+
+    private int userId;
+    private int carId;
+
+    private TextView usernameTextView;
+
+    private TextView emailTextView;
+
+    private TextView manufacturerTextView;
+
+    private TextView modelTextView;
+
+    private TextView registerPlateTextView;
+
+
 
     Button deleteCarButton;
 
@@ -66,6 +92,15 @@ public class SettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         deleteCarButton = view.findViewById(R.id.delete_car);
         deleteCarButtonSetUp();
+        usernameTextView = view.findViewById(R.id.username_text_view);
+        emailTextView = view.findViewById(R.id.email_text_view);
+        manufacturerTextView = view.findViewById(R.id.manufacturer_text_view);
+        modelTextView = view.findViewById(R.id.model_text_view);
+        registerPlateTextView = view.findViewById(R.id.register_plate_text_view);
+        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        userId = prefs.getInt("USER_ID", -1);
+        carId = prefs.getInt("CAR_ID", -1);
+        loadUserAndEmailFromDataBase();
         return view;
     }
 
@@ -76,5 +111,59 @@ public class SettingsFragment extends Fragment {
                 Toast.makeText(getContext(), "Ai apasat pe butonul de stergere masina", Toast.LENGTH_LONG).show();
             }
         });;
+    }
+
+    private void loadUserAndEmailFromDataBase(){
+        ConnectionClass connectionClass = new ConnectionClass();
+        Connection conn = connectionClass.CONN();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            Statement stmt = null;
+            ResultSet rs = null;
+            try{
+                if(conn == null){
+                    Toast.makeText(getContext(),"Problema de conexiune",Toast.LENGTH_LONG).show();
+                }else{
+                    stmt = conn.createStatement();
+
+                    String query = "SELECT Name,Email FROM Users WHERE User_ID = "+userId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while (rs.next()) {
+                        String name =rs.getString("Name");
+                        String email =rs.getString("Email");
+
+                        usernameTextView.setText(name);
+                        emailTextView.setText(email);
+                    }
+
+                    query = "SELECT Manufacturer, Model, RegisterPlate FROM Cars WHERE Car_ID = " + carId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while(rs.next()){
+                        String manufacturer = rs.getString("Manufacturer");
+                        String model = rs.getString("Model");
+                        String plate = rs.getString("RegisterPlate");
+
+                        manufacturerTextView.setText(manufacturer);
+                        modelTextView.setText(model);
+                        registerPlateTextView.setText(plate);
+                    }
+                    conn.close();
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 }

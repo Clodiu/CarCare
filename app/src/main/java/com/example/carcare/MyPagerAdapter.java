@@ -1,5 +1,7 @@
 package com.example.carcare;
 
+import android.util.SparseArray;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -10,24 +12,40 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class MyPagerAdapter extends FragmentStateAdapter {
 
+    private final SparseArray<Fragment> fragments = new SparseArray<>();
+
     public MyPagerAdapter(@NonNull FragmentActivity fa) {
-        super(fa);
+        super(fa);;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
+        Fragment fragment = null;
         switch (position) {
-            case 0: return new HomeFragment();
-            case 1: return new CalendarFragment();
-            case 2: return new SettingsFragment();
-            case 3: return new SettingsFragment();
-            default: return new HomeFragment();
+            case 0:
+                fragment = new HomeFragment();
+                break;
+            case 1:
+                fragment = new CalendarFragment();
+                break;
+            case 2:
+                fragment = new SettingsFragment();
+                break;
+            case 3:
+                fragment = new SettingsFragment();
+                break;
         }
+        fragments.put(position, fragment);
+        return fragment;
     }
 
     @Override
     public int getItemCount() {
         return 4; // numarul de taburi/fragments
+    }
+
+    public Fragment getFragment(int position) {
+        return fragments.get(position);
     }
 }

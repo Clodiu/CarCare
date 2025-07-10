@@ -24,6 +24,10 @@ public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
+    public void setNotes(ArrayList<Note> notes) {
+        this.carNotes = notes;
+    }
+
     @NonNull
     @Override
     public NoteList_RecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

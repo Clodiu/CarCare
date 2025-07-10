@@ -1,6 +1,8 @@
 package com.example.carcare;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -20,12 +22,20 @@ import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CalendarFragment extends Fragment implements NoteRecyclerViewInterface{
 
+    private int carId = 1005;
     private CalendarView calendarView;
     private RecyclerView recyclerView;
 
@@ -78,6 +88,9 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
+
+        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        carId = prefs.getInt("CAR_ID", -1);
         calendarView = view.findViewById(R.id.calendarView);
 
         setUpCalendarIcons();
@@ -95,8 +108,11 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         calendarView.setMinimumDate(min);
         calendarView.setMaximumDate(max);
 
+        Calendar today = Calendar.getInstance();
+        loadNotesForDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH));
+
         recyclerView = view.findViewById(R.id.recycler_view_notes);
-        setUpCarNotes();
+        //setUpCarNotes();
         adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -112,24 +128,54 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         }
     }
 
-    //Adauga cateva date pentru test
+    //Adaugarea datelor in care exista inregistrari de note pentru masina curenta
     void setUpHighlightedDays(){
-        List<EventDay> events = new ArrayList<>();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            ConnectionClass connectionClass = new ConnectionClass();
+            Connection conn = connectionClass.CONN();
 
-        //Se marcheaza zilele cu event cu ic_circle_event_day
+            Statement stmt = null;
+            ResultSet rs = null;
 
-        // Exemplu: marchează 10 iulie 2025
-        Calendar day1 = Calendar.getInstance();
-        day1.set(2025, Calendar.JULY, 10);
-        events.add(new EventDay(day1, R.drawable.ic_circle_event_day));  // icon drawable în res/drawable
+            List<EventDay> events = new ArrayList<>();
 
-        // Exemplu: marchează 15 iulie 2025
-        Calendar day2 = Calendar.getInstance();
-        day2.set(2025, Calendar.JULY, 15);
-        events.add(new EventDay(day2, R.drawable.ic_circle_event_day));
+            try {
+                if (conn != null) {
+                    stmt = conn.createStatement();
 
-        // Pune lista de events pe CalendarView
-        calendarView.setEvents(events);
+                    // Selectam datele diferite din notitele masinii curente
+                    String query = "SELECT DISTINCT Date FROM Notes WHERE Car_ID = " + carId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while (rs.next()) {
+                        java.sql.Date sqlDate = rs.getDate("Date");
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(sqlDate);
+
+                        // Adaugam iconita ca event
+                        events.add(new EventDay(cal, R.drawable.ic_circle_event_day));
+                    }
+                    conn.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            // Se actualizeaza calendarul pe ui-thread
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> calendarView.setEvents(events));
+            }
+        });
     }
 
     void setOnDayClick(){
@@ -140,9 +186,8 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
             int month = clickedDay.get(Calendar.MONTH) + 1; // luna începe de la 0
             int day = clickedDay.get(Calendar.DAY_OF_MONTH);
 
-            String message = "Ziua selectată: " + day + "/" + month + "/" + year;
-
-            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            // Apelează metoda de încărcare a notițelor pentru data selectată
+            loadNotesForDate(year, month, day);
         });
     }
 
@@ -169,5 +214,74 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         Toast.makeText(getContext(), "Ai apasat din calendar fragment boss", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(getContext(), NoteViewActivity.class);
         startActivity(intent);
+    }
+
+    public void loadNotesForDate(int year, int month, int day) {
+        carNotes.clear();
+        ConnectionClass connectionClass = new ConnectionClass();
+        Connection conn = connectionClass.CONN();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            Statement stmt = null;
+            ResultSet rs = null;
+            try {
+                if (conn == null) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Problema de conexiune", Toast.LENGTH_LONG).show()
+                        );
+                    }
+                } else {
+                    stmt = conn.createStatement();
+
+                    // Formatăm data în formatul corespunzător SQL, ex: '2025-07-10'
+                    String dateString = String.format("%04d-%02d-%02d", year, month, day);
+
+                    // Query care selectează notițele pentru data respectivă
+                    String query = "SELECT * FROM Notes WHERE Date = '" + dateString + "'" + " AND Car_ID = " + carId;
+
+                    rs = stmt.executeQuery(query);
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+                    while (rs.next()) {
+                        int noteId = rs.getInt("Note_ID");
+                        String title = rs.getString("Title");
+                        String description = rs.getString("Description");
+                        int kilometers = rs.getInt("Kilometers");
+                        Date date = rs.getDate("Date");
+                        int creatorId = rs.getInt("Creator_ID");
+                        int carid = rs.getInt("Car_ID");
+
+                        String dateFormatted = formatter.format(date);
+
+                        carNotes.add(new Note(noteId, title, description, kilometers, dateFormatted, creatorId, carid));
+                    }
+
+                    conn.close();
+
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> updateAdapter());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void updateAdapter() {
+        if (adapter != null) {
+            getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+        }
     }
 }

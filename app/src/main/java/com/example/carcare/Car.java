@@ -41,4 +41,12 @@ public class Car {
     public String getLastServiced() {
         return lastServiced;
     }
+
+    public int getCarId() {
+        return carId;
+    }
+
+    public int getCreatorId() {
+        return creatorId;
+    }
 }

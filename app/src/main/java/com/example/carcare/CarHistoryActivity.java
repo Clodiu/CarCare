@@ -3,6 +3,7 @@ package com.example.carcare;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
@@ -26,10 +27,22 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CarHistoryActivity extends AppCompatActivity{
+
+    private int userId = 2;
+
+    private int carId = 1005;
 
     private DatePickerDialog datePickerDialog;
     private Button dateButton;
@@ -45,6 +58,8 @@ public class CarHistoryActivity extends AppCompatActivity{
 
     private TextInputEditText titleEditText;
     private TextInputEditText descriptionEditText;
+
+    private TextInputEditText kmEditText;
 
     private Button saveButton;
 
@@ -65,6 +80,11 @@ public class CarHistoryActivity extends AppCompatActivity{
         getWindow().getDecorView().setSystemUiVisibility(
                 android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         );
+
+        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+        userId = prefs.getInt("USER_ID", -1);
+        carId = prefs.getInt("CAR_ID", -1);
+
         mainLayout = findViewById(R.id.main);
 
         dateButton = findViewById(R.id.date_picker_button);
@@ -72,6 +92,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         addButton = findViewById(R.id.button_add);
         titleEditText = findViewById(R.id.title_input_text);
         descriptionEditText = findViewById(R.id.description_input_text);
+        kmEditText = findViewById(R.id.km_input_text);
         saveButton = findViewById(R.id.save_button);
 
         setUpAddButton();
@@ -192,15 +213,74 @@ public class CarHistoryActivity extends AppCompatActivity{
             public void onClick(View v) {
                 String title = titleEditText.getText().toString().trim();
                 String description = descriptionEditText.getText().toString().trim();
+                int kilometers = Integer.parseInt(kmEditText.getText().toString().trim());
                 CharSequence buttonText = dateButton.getText();
                 String date = (buttonText != null) ? buttonText.toString().trim() : "No date selected";
 
-                String message = "Title: " + title + "\nDescription: " + description + "\nDate: "+ date;
+                if(!title.isEmpty()){
+                    ConnectionClass connectionClass = new ConnectionClass();
+                    Connection conn = connectionClass.CONN();
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-                Toast.makeText(CarHistoryActivity.this, message, Toast.LENGTH_LONG).show();
+                    executorService.execute(() -> {
+                        try{
+                            if(conn == null){
 
+                            }else{
+                                Statement stmt = conn.createStatement();
+
+                                //Creeaza query-ul
+                                String query = "INSERT INTO Notes (Title,Description,Kilometers,Date,Creator_ID,Car_ID) VALUES (?,?,?,?,?,?)";
+                                java.sql.PreparedStatement pstmt = conn.prepareStatement(query);
+
+                                //Seteaza parametrii de inserat in Cars
+                                pstmt.setString(1, title);
+                                pstmt.setString(2,description);
+                                pstmt.setInt(3,kilometers);
+
+                                // Creeaza un formatter cu formatul potrivit
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+                                // Transformam String-ul într-un java.util.Date
+                                java.util.Date utilDate = formatter.parse(date);
+
+                                // Transformam in java.sql.Date (potrivit pentru SQL)
+                                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+
+                                pstmt.setDate(4,sqlDate);
+                                pstmt.setInt(5,userId);
+                                pstmt.setInt(6,carId);
+
+                                //Ruleaza insert-ul
+                                pstmt.executeUpdate();
+                                pstmt.close();
+                                conn.close();
+
+                                //Thread UI pentru update
+                                runOnUiThread(() -> {
+                                    HomeFragment homeFragment = (HomeFragment) pagerAdapter.getFragment(0);
+                                    if (homeFragment != null) {
+                                        homeFragment.loadNotesFromDatabase(); //reactualizam notitele pentru a o contine si pe cea nou adaugata
+                                        homeFragment.updateAdapter();
+                                    }
+                                    CalendarFragment calendarFragment = (CalendarFragment) pagerAdapter.getFragment(1);
+                                    if (calendarFragment != null) {
+                                        calendarFragment.setUpHighlightedDays();  // metoda care incarca si evidentiaza zilele din calendar calendar
+                                    }
+                                });
+
+                            }
+                        }catch (Exception e){
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+
+
+                }
                 titleEditText.setText("");
                 descriptionEditText.setText("");
+                kmEditText.setText("");
 
             }
         });
@@ -242,4 +322,5 @@ public class CarHistoryActivity extends AppCompatActivity{
             }
         });
     }
+
 }

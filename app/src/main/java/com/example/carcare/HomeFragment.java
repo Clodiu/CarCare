@@ -2,6 +2,7 @@ package com.example.carcare;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 
@@ -23,7 +24,14 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +40,8 @@ import java.util.ArrayList;
  */
 public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
 
+    private int carId = 1005;
+
     private TextInputEditText searchEditText;
 
     private RecyclerView recyclerView;
@@ -39,6 +49,7 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
     private NoteList_RecyclerViewAdapter adapter;
 
     private ArrayList<Note> carNotes = new ArrayList<>();
+    private ArrayList<Note> filteredNotes = new ArrayList<>();
 
     private RelativeLayout mainLayout;
 
@@ -90,10 +101,13 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        carId = prefs.getInt("CAR_ID", -1);
         mainLayout = view.findViewById(R.id.main);
         recyclerView = view.findViewById(R.id.recycler_view_notes);
         searchEditText = view.findViewById(R.id.search_edit_text);
-        setUpCarNotes();
+        //setUpCarNotes();
+        loadNotesFromDatabase();
         adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -125,7 +139,7 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
                 searchRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getContext(), "Cauți: " + s.toString(), Toast.LENGTH_SHORT).show();
+                        filterNotes(s.toString());
                     }
                 };
 
@@ -138,6 +152,23 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
             }
         });
 
+    }
+
+    private void filterNotes(String query){
+        filteredNotes.clear();
+        if (query.isEmpty()) {
+            filteredNotes.addAll(carNotes);  // dacă nu ai text, arată tot
+        } else {
+            for (Note note : carNotes) {
+                if (note.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                    filteredNotes.add(note);
+                }
+            }
+        }
+        getActivity().runOnUiThread(() -> {
+            adapter.setNotes(filteredNotes);
+            adapter.notifyDataSetChanged();
+        });
     }
 
     private void initNoFocusSearchbarWhenNoKeyboard(){
@@ -174,5 +205,66 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
         Toast.makeText(getContext(), "Ai apasat din home fragment boss", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(getContext(), NoteViewActivity.class);
         startActivity(intent);
+    }
+
+    public void loadNotesFromDatabase(){
+        carNotes.clear();
+        ConnectionClass connectionClass = new ConnectionClass();
+        Connection conn = connectionClass.CONN();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            Statement stmt = null;
+            ResultSet rs = null;
+            try{
+                if(conn == null){
+                    Toast.makeText(getContext(),"Problema de conexiune",Toast.LENGTH_LONG).show();
+                }else{
+                    stmt = conn.createStatement();
+
+                    String query = "SELECT * FROM Notes WHERE Car_ID = "+carId;
+
+                    rs = stmt.executeQuery(query);
+
+                    while (rs.next()) {
+                        int noteId = rs.getInt("Note_ID");
+                        String title = rs.getString("Title");
+                        String description = rs.getString("Description");
+                        int kilometers = rs.getInt("Kilometers");
+                        Date date = rs.getDate("Date");
+                        int creatorId = rs.getInt("Creator_ID");
+                        int carid = rs.getInt("Car_ID");
+
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                        String dateString = formatter.format(date);
+
+                        carNotes.add(new Note(noteId,title,description,kilometers, dateString,creatorId,carid));
+                    }
+
+                    conn.close();
+
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            updateAdapter();
+                        });
+                    }
+                }
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }finally {
+                try {
+                    if (rs != null) rs.close();
+                    if (stmt != null) stmt.close();
+                    if (conn != null) conn.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void updateAdapter() {
+        if (adapter != null) {
+            getActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());
+        }
     }
 }

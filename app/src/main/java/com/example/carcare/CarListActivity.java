@@ -32,6 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -157,8 +158,11 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                             }else{
                                 Statement stmt = conn.createStatement();
 
+                                //Creeaza query-ul cu RETURN_GENERATED_KEYS
                                 String query = "INSERT INTO Cars (Manufacturer,Model,RegisterPlate,LastServiced,Creator_ID) VALUES (?,?,?,?,?)";
-                                java.sql.PreparedStatement pstmt = conn.prepareStatement(query);
+                                java.sql.PreparedStatement pstmt = conn.prepareStatement(query,Statement.RETURN_GENERATED_KEYS);
+
+                                //Seteaza parametrii de inserat in Cars
                                 pstmt.setString(1, manufacturer);
                                 pstmt.setString(2,model);
                                 pstmt.setString(3,registerPlate);
@@ -173,9 +177,31 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                                 pstmt.setDate(4,sqlDate);
                                 pstmt.setInt(5,userId);
 
+                                //Ruleaza insert-ul
                                 pstmt.executeUpdate();
 
+                                //Preia cheia generata
+                                ResultSet rs = pstmt.getGeneratedKeys();
+                                int generatedCarId = -1;
+
+                                if (rs.next()) {
+                                    generatedCarId = rs.getInt(1); // indexul coloanei generate
+                                }
+
+                                rs.close();
                                 pstmt.close();
+
+                                //Insereaza in UserCarAccess perechea User_ID, Car_ID. Ca creatorul sa aiba acces la masina.
+                                if (generatedCarId != -1) {
+                                    String accessQuery = "INSERT INTO UserCarAccess (User_ID, Car_ID) VALUES (?, ?)";
+                                    PreparedStatement accessStmt = conn.prepareStatement(accessQuery);
+                                    accessStmt.setInt(1, userId);
+                                    accessStmt.setInt(2, generatedCarId);
+
+                                    accessStmt.executeUpdate();
+                                    accessStmt.close();
+                                }
+
                                 conn.close();
 
                                 // Dupa inserare, incarca din nou datele pe thread-ul UI
@@ -252,12 +278,12 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //Opreste runnable-ul anterior dacă tastează din nou rapid
+                //Opreste runnable-ul anterior daca tasteaza din nou rapid
                 if (searchRunnable != null) {
                     handler.removeCallbacks(searchRunnable);
                 }
 
-                //Setează runnable-ul cu delay
+                //Seteaza runnable-ul cu delay
                 searchRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -346,6 +372,17 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
 
     @Override
     public void onItemClick(int position) {
+        if(filteredCars.isEmpty()){
+            SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("CAR_ID", userCars.get(position).getCarId());
+            editor.apply();
+        }else{
+            SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("CAR_ID", filteredCars.get(position).getCarId());
+            editor.apply();
+        }
         Intent intent = new Intent(CarListActivity.this, CarHistoryActivity.class);
         startActivity(intent);
     }
@@ -364,7 +401,7 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                 }else{
                     stmt = conn.createStatement();
 
-                    String query = "SELECT * FROM CarCareDB.dbo.Cars WHERE Creator_ID = "+userId;
+                    String query = "SELECT c.Car_ID, Manufacturer, Model, RegisterPlate, LastServiced, Creator_ID FROM Cars c,UserCarAccess a WHERE c.Car_ID=a.Car_ID AND a.User_ID = "+userId;
 
                     rs = stmt.executeQuery(query);
 
@@ -418,8 +455,8 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                     rs = stmt.executeQuery(query);
 
                     while (rs.next()) {
-                        String name = "Username: " + rs.getString("Name");
-                        String email = "Email: " + rs.getString("Email");
+                        String name =rs.getString("Name");
+                        String email =rs.getString("Email");
 
                         usernameTextView.setText(name);
                         emailTextView.setText(email);

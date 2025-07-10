@@ -203,28 +203,54 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/username_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Username:"
+                android:textColor="@color/primary_tint_color"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+            <TextView
+                android:id="@+id/username_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="test"
                 android:textColor="@color/search_text_color"
                 android:textSize="18sp"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email:"
+                android:textColor="@color/primary_tint_color"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
 
             <TextView
                 android:id="@+id/email_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Email:"
+                android:text="test"
                 android:textColor="@color/search_text_color"
                 android:textSize="18sp"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"/>
 
             <Button
                 android:id="@+id/logout_button"
                 android:layout_width="wrap_content"
                 android:layout_height="60dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:text="LogOut"
                 android:textSize="18sp"
                 android:backgroundTint="@color/primary_tint_color"
