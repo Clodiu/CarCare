@@ -202,7 +202,17 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
 
     @Override
     public void onItemClick(int position) {
-        Toast.makeText(getContext(), "Ai apasat din home fragment boss", Toast.LENGTH_LONG).show();
+        if(filteredNotes.isEmpty()){
+            SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("NOTE_ID", carNotes.get(position).getNote_ID());
+            editor.apply();
+        }else{
+            SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("NOTE_ID", filteredNotes.get(position).getNote_ID());
+            editor.apply();
+        }
         Intent intent = new Intent(getContext(), NoteViewActivity.class);
         startActivity(intent);
     }
