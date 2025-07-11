@@ -1,5 +1,6 @@
 package com.example.carcare;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -71,8 +72,66 @@ public class NoteViewActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(NoteViewActivity.this, "Ai apasat save note", Toast.LENGTH_LONG).show();
+                String title = titleTextView.getText().toString().trim();
+                String desc = descTextView.getText().toString().trim();
+                String km = kmTextView.getText().toString().trim();
+                if(title.isEmpty()){
+                    Toast.makeText(NoteViewActivity.this, "Title cannot be empty!", Toast.LENGTH_LONG).show();
+                }else if(km.isEmpty()){
+                    Toast.makeText(NoteViewActivity.this, "Km field cannot be empty!", Toast.LENGTH_LONG).show();
+                }else{
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.execute(() -> {
+                        ConnectionClass connectionClass = new ConnectionClass();
+                        Connection conn = connectionClass.CONN();
+                        Statement stmt = null;
 
+                        try {
+                            if (conn == null) {
+                                runOnUiThread(() ->
+                                        Toast.makeText(NoteViewActivity.this, "Problema de conexiune", Toast.LENGTH_LONG).show()
+                                );
+                            } else {
+                                stmt = conn.createStatement();
+
+                                String updateQuery = "UPDATE Notes SET " +
+                                        "Title = '" + title + "', " +
+                                        "Description = '" + desc + "', " +
+                                        "Kilometers = " + km + " " +
+                                        "WHERE Note_ID = " + noteID;
+
+                                int rowsAffected = stmt.executeUpdate(updateQuery);
+
+                                if (rowsAffected > 0) {
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(NoteViewActivity.this, "Note updated!", Toast.LENGTH_SHORT).show();
+                                        // Trimite rezultat către fragment
+                                        Intent resultIntent = new Intent();
+                                        resultIntent.putExtra("note_updated", true);
+                                        setResult(RESULT_OK, resultIntent);
+                                        finish();
+                                    });
+                                } else {
+                                    runOnUiThread(() ->
+                                            Toast.makeText(NoteViewActivity.this, "Note not found!", Toast.LENGTH_SHORT).show()
+                                    );
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runOnUiThread(() ->
+                                    Toast.makeText(NoteViewActivity.this, "Eroare la ștergere: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+                        } finally {
+                            try {
+                                if (stmt != null) stmt.close();
+                                if (conn != null) conn.close();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    });
+                }
             }
         });
     }
@@ -101,8 +160,11 @@ public class NoteViewActivity extends AppCompatActivity {
 
                             if (rowsAffected > 0) {
                                 runOnUiThread(() -> {
-                                    Toast.makeText(NoteViewActivity.this, "Nota a fost ștearsă!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(NoteViewActivity.this, "Note deleted!", Toast.LENGTH_SHORT).show();
                                     // Înapoi la CarHistoryActivity
+                                    Intent resultIntent = new Intent();
+                                    resultIntent.putExtra("note_deleted", true);
+                                    setResult(RESULT_OK, resultIntent);
                                     finish(); // sau folosește Intent dacă vrei să-l forțezi
                                     // startActivity(new Intent(NoteViewActivity.this, CarHistoryActivity.class));
                                 });
@@ -159,7 +221,7 @@ public class NoteViewActivity extends AppCompatActivity {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
                         String dateString = formatter.format(date);
 
-                        currentNote = new Note(noteId,title,description,kilometers, dateString,creatorId,carid);
+                        currentNote = new Note(noteId,title.trim(),description.trim(),kilometers, dateString,creatorId,carid);
 
                         displayNote();
                     }

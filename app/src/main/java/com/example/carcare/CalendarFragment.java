@@ -35,12 +35,16 @@ import java.util.concurrent.Executors;
 
 public class CalendarFragment extends Fragment implements NoteRecyclerViewInterface{
 
-    private int carId = 1005;
+    //Variabila in care incarcam id-ul salvat al masinii pe care am dat click
+    private int carId;
+
     private CalendarView calendarView;
     private RecyclerView recyclerView;
 
+    //Adaptorul care se ocupa de gestionarea recyclerView
     private NoteList_RecyclerViewAdapter adapter;
 
+    //Lista cu notitele masinii
     private ArrayList<Note> carNotes = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
@@ -89,12 +93,14 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
 
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
 
+        //Se incarca car_id din memorie
         SharedPreferences prefs = getActivity().getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         carId = prefs.getInt("CAR_ID", -1);
+
+        //Conectarea calendarului la componenta din xml
         calendarView = view.findViewById(R.id.calendarView);
 
-        setUpCalendarIcons();
-
+        //Setam niste limite de ani pentru calendar
         Calendar min = Calendar.getInstance();
         min.set(Calendar.YEAR, 2000);
         min.set(Calendar.MONTH, Calendar.JANUARY); // sau 0
@@ -109,10 +115,14 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         calendarView.setMaximumDate(max);
 
         Calendar today = Calendar.getInstance();
+
+        //Se incarca initial notele pentru ziua curenta
         loadNotesForDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH));
 
         recyclerView = view.findViewById(R.id.recycler_view_notes);
         //setUpCarNotes();
+
+        //Relatia dintre adaptor si recyclerView
         adapter = new NoteList_RecyclerViewAdapter(getContext(),carNotes, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -178,6 +188,7 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         });
     }
 
+    //Metoda care preia data pe care utilizatorul o apasa si incarca notitele din acea zi
     void setOnDayClick(){
         calendarView.setOnDayClickListener(eventDay -> {
             Calendar clickedDay = eventDay.getCalendar();
@@ -186,25 +197,8 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
             int month = clickedDay.get(Calendar.MONTH) + 1; // luna începe de la 0
             int day = clickedDay.get(Calendar.DAY_OF_MONTH);
 
-            // Apelează metoda de încărcare a notițelor pentru data selectată
+            // Apeleaza metoda de incarcare a notitelor pentru data selectata
             loadNotesForDate(year, month, day);
-        });
-    }
-
-    void setUpCalendarIcons(){
-        calendarView.post(() -> {
-            int prevId = getResources().getIdentifier("arrow_previous", "id", "com.applandeo.materialcalendarview");
-            int nextId = getResources().getIdentifier("arrow_next", "id", "com.applandeo.materialcalendarview");
-
-            View prevButton = calendarView.findViewById(prevId);
-            View nextButton = calendarView.findViewById(nextId);
-
-            if (prevButton instanceof ImageButton) {
-                ((ImageButton) prevButton).setImageResource(R.drawable.arrow_back_icon_24dp);
-            }
-            if (nextButton instanceof ImageButton) {
-                ((ImageButton) nextButton).setImageResource(R.drawable.arrow_forward_icon_24dp);
-            }
         });
     }
 
@@ -216,6 +210,7 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
         startActivity(intent);
     }
 
+    //Metoda care incarca notitele dintr-o zi in vector
     public void loadNotesForDate(int year, int month, int day) {
         carNotes.clear();
         ConnectionClass connectionClass = new ConnectionClass();
@@ -235,10 +230,10 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
                 } else {
                     stmt = conn.createStatement();
 
-                    // Formatăm data în formatul corespunzător SQL, ex: '2025-07-10'
+                    // Formatam data in formatul corespunzator SQL ex: '2025-07-10'
                     String dateString = String.format("%04d-%02d-%02d", year, month, day);
 
-                    // Query care selectează notițele pentru data respectivă
+                    // Query care selecteaza notițele pentru data respectiva
                     String query = "SELECT * FROM Notes WHERE Date = '" + dateString + "'" + " AND Car_ID = " + carId;
 
                     rs = stmt.executeQuery(query);

@@ -1,5 +1,7 @@
 package com.example.carcare;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -117,6 +119,18 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
         return view;
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            boolean noteDeleted = data.getBooleanExtra("note_deleted", false);
+            boolean noteUpdated = data.getBooleanExtra("note_updated", false);
+            if (noteDeleted || noteUpdated) {
+                // NOTE: Aici reîncarci baza de date:
+                loadNotesFromDatabase();
+            }
+        }
+    }
+
     private void setUpCarNotes(){
         for(int i = 1 ; i <= 20 ; i++){
             carNotes.add(new Note());
@@ -214,7 +228,7 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
             editor.apply();
         }
         Intent intent = new Intent(getContext(), NoteViewActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 1);
     }
 
     public void loadNotesFromDatabase(){

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +14,16 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputEditText;
+
 import org.w3c.dom.Text;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +46,12 @@ public class SettingsFragment extends Fragment {
     private TextView modelTextView;
 
     private TextView registerPlateTextView;
+
+    private Button addAccesButton;
+
+    private Button removeAccessButton;
+
+    private TextInputEditText emailInputText;
 
 
 
@@ -90,7 +102,10 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        addAccesButton = view.findViewById(R.id.add_access);
+        removeAccessButton = view.findViewById(R.id.remove_access);
         deleteCarButton = view.findViewById(R.id.delete_car);
+        emailInputText = view.findViewById(R.id.mail_input_text);
         deleteCarButtonSetUp();
         usernameTextView = view.findViewById(R.id.username_text_view);
         emailTextView = view.findViewById(R.id.email_text_view);
@@ -101,8 +116,210 @@ public class SettingsFragment extends Fragment {
         userId = prefs.getInt("USER_ID", -1);
         carId = prefs.getInt("CAR_ID", -1);
         loadUserAndEmailFromDataBase();
+        addAccessButtonSetUp();
+        removeAccessButtonSetUp();
         return view;
     }
+
+    private void addAccessButtonSetUp(){
+        addAccesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String mail = emailInputText.getText().toString().trim();
+
+                if(!mail.isEmpty()){
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.execute(() -> {
+                        ConnectionClass connectionClass = new ConnectionClass();
+                        Connection conn = connectionClass.CONN();
+
+                        if (conn == null) {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Problema de conexiune", Toast.LENGTH_LONG).show()
+                            );
+                            return;
+                        }
+
+                        PreparedStatement userStmt = null;
+                        PreparedStatement creatorStmt = null;
+                        PreparedStatement insertAccessStmt = null;
+                        ResultSet rsUser = null;
+                        ResultSet rsCreator = null;
+
+                        try {
+                            //Ia User_ID pentru mail-ul introdus
+                            String userQuery = "SELECT User_ID FROM Users WHERE Email = ?";
+                            userStmt = conn.prepareStatement(userQuery);
+                            userStmt.setString(1, mail);
+                            rsUser = userStmt.executeQuery();
+
+                            int targetUserId = -1;
+                            if (rsUser.next()) {
+                                targetUserId = rsUser.getInt("User_ID");
+                            } else {
+                                getActivity().runOnUiThread(() ->
+                                        Toast.makeText(getContext(), "Email-ul nu a fost găsit!", Toast.LENGTH_LONG).show()
+                                );
+                                return;
+                            }
+
+                            //Verifică dacă user-ul curent este creatorul mașinii
+                            String creatorQuery = "SELECT Creator_ID FROM Cars WHERE Car_ID = ?";
+                            creatorStmt = conn.prepareStatement(creatorQuery);
+                            creatorStmt.setInt(1, carId);  // Folosește ID-ul mașinii curente
+                            rsCreator = creatorStmt.executeQuery();
+
+                            int creatorId = -1;
+                            if (rsCreator.next()) {
+                                creatorId = rsCreator.getInt("Creator_ID");
+                            }
+
+                            if (creatorId != userId) {
+                                getActivity().runOnUiThread(() ->
+                                        Toast.makeText(getContext(), "Nu ai voie să oferi acces la această mașină!", Toast.LENGTH_LONG).show()
+                                );
+                                return;
+                            }
+
+                            //Inserează perechea în UserCarAccess
+                            String accessQuery = "INSERT INTO UserCarAccess (User_ID, Car_ID) VALUES (?, ?)";
+                            insertAccessStmt = conn.prepareStatement(accessQuery);
+                            insertAccessStmt.setInt(1, targetUserId);
+                            insertAccessStmt.setInt(2, carId);  // ID-ul mașinii curente
+
+                            insertAccessStmt.executeUpdate();
+
+                            getActivity().runOnUiThread(() ->
+                                    Toast.makeText(getContext(), "Acces adăugat cu succes!", Toast.LENGTH_SHORT).show()
+                            );
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            getActivity().runOnUiThread(() ->
+                                    Toast.makeText(getContext(), "Eroare: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+                        } finally {
+                            try {
+                                if (rsUser != null) rsUser.close();
+                                if (rsCreator != null) rsCreator.close();
+                                if (userStmt != null) userStmt.close();
+                                if (creatorStmt != null) creatorStmt.close();
+                                if (insertAccessStmt != null) insertAccessStmt.close();
+                                if (conn != null) conn.close();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+
+    private void removeAccessButtonSetUp() {
+        removeAccessButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String mail = emailInputText.getText().toString().trim();
+
+                if (!mail.isEmpty()) {
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.execute(() -> {
+                        ConnectionClass connectionClass = new ConnectionClass();
+                        Connection conn = connectionClass.CONN();
+
+                        if (conn == null) {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Problema de conexiune", Toast.LENGTH_LONG).show()
+                            );
+                            return;
+                        }
+
+                        PreparedStatement userStmt = null;
+                        PreparedStatement creatorStmt = null;
+                        PreparedStatement deleteAccessStmt = null;
+                        ResultSet rsUser = null;
+                        ResultSet rsCreator = null;
+
+                        try {
+                            //Gaseste User_ID dupa mail
+                            String userQuery = "SELECT User_ID FROM Users WHERE Email = ?";
+                            userStmt = conn.prepareStatement(userQuery);
+                            userStmt.setString(1, mail);
+                            rsUser = userStmt.executeQuery();
+
+                            int targetUserId = -1;
+                            if (rsUser.next()) {
+                                targetUserId = rsUser.getInt("User_ID");
+                            } else {
+                                requireActivity().runOnUiThread(() ->
+                                        Toast.makeText(requireContext(), "Email-ul nu a fost găsit!", Toast.LENGTH_LONG).show()
+                                );
+                                return;
+                            }
+
+                            //Verifica daca user-ul curent este creatorul masinii
+                            String creatorQuery = "SELECT Creator_ID FROM Cars WHERE Car_ID = ?";
+                            creatorStmt = conn.prepareStatement(creatorQuery);
+                            creatorStmt.setInt(1, carId);  // ID-ul mașinii curente
+                            rsCreator = creatorStmt.executeQuery();
+
+                            int creatorId = -1;
+                            if (rsCreator.next()) {
+                                creatorId = rsCreator.getInt("Creator_ID");
+                            }
+
+                            if (creatorId != userId) {
+                                requireActivity().runOnUiThread(() ->
+                                        Toast.makeText(requireContext(), "Nu ai voie sa modifici accesul acestei masini!", Toast.LENGTH_LONG).show()
+                                );
+                                return;
+                            }
+
+                            //Sterge din UserCarAccess
+                            String deleteQuery = "DELETE FROM UserCarAccess WHERE User_ID = ? AND Car_ID = ?";
+                            deleteAccessStmt = conn.prepareStatement(deleteQuery);
+                            deleteAccessStmt.setInt(1, targetUserId);
+                            deleteAccessStmt.setInt(2, carId);
+
+                            int rowsAffected = deleteAccessStmt.executeUpdate();
+
+                            if (rowsAffected > 0) {
+                                requireActivity().runOnUiThread(() ->
+                                        Toast.makeText(requireContext(), "Acces șters cu succes!", Toast.LENGTH_SHORT).show()
+                                );
+                            } else {
+                                requireActivity().runOnUiThread(() ->
+                                        Toast.makeText(requireContext(), "Utilizatorul nu avea acces la această mașină.", Toast.LENGTH_SHORT).show()
+                                );
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Eroare: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+                        } finally {
+                            try {
+                                if (rsUser != null) rsUser.close();
+                                if (rsCreator != null) rsCreator.close();
+                                if (userStmt != null) userStmt.close();
+                                if (creatorStmt != null) creatorStmt.close();
+                                if (deleteAccessStmt != null) deleteAccessStmt.close();
+                                if (conn != null) conn.close();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    });
+                } else {
+                    Toast.makeText(requireContext(), "Te rog să introduci un email!", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
 
     private void deleteCarButtonSetUp(){
         deleteCarButton.setOnClickListener(new View.OnClickListener() {

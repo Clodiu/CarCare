@@ -34,18 +34,26 @@ public class AuthActivity extends AppCompatActivity {
 
     //Declaratiile pentru obiectele care trebuiesc preluate din fisierul xml
 
+    //Card view-urile care reprezinta formularele pentru signup si login
     private CardView signUpCardView;
     private CardView logInCardView;
+
+    //Layout-ul general al paginii
     private RelativeLayout mainLayout;
+
+
+    //Componentele formularului de sign up
     private TextInputEditText signUpNameEditText;
     private TextInputEditText signUpMailEditText;
     private TextInputEditText signUpPasswordEditText;
     private Button signUpButton;
 
+    //Compunentele formularului de login
     private TextInputEditText logInMailEditText;
     private TextInputEditText logInPasswordEditText;
     private Button logInButton;
 
+    //Butonul care face trecerea intre formulare
     private FloatingActionButton swapButton;
 
     @Override
@@ -59,9 +67,12 @@ public class AuthActivity extends AppCompatActivity {
             return insets;
         });
 
+        //Se incarca din mmemorie din MyAppPrefs campul USER_ID pentru a verifica daca deja a exitat o logare in trecut
+        //In principiu daca exista salvat un user_id acolo, functioneaza ca un remember-me
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         int savedUserId = prefs.getInt("USER_ID", -1);
 
+        //Daca savedUserId e diferit de -1 inseamna ca am fost conectat in trecut, deci dam skip la pagina de autentificare
         if (savedUserId != -1) {
             // Exista un user logat - mergi direct in CarListActivity
             Intent intent = new Intent(AuthActivity.this, CarListActivity.class);
@@ -70,9 +81,12 @@ public class AuthActivity extends AppCompatActivity {
             finish();
         }
 
+        //Setam manual culoarea barii de notificare
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_tint_color));
 
+        //Conectam variablele din clasa cu corespondentii din fisierul xml
         mainLayout = findViewById(R.id.main);
+
         signUpNameEditText = findViewById(R.id.signup_name_input_text);
         signUpMailEditText = findViewById(R.id.signup_mail_input_text);
         signUpPasswordEditText = findViewById(R.id.signup_password_input_text);
@@ -93,6 +107,7 @@ public class AuthActivity extends AppCompatActivity {
         swapOnClick();
     }
 
+    //Metoda ce schimba intre formularele de sign up si log in
     private void swapOnClick(){
         swapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,22 +123,25 @@ public class AuthActivity extends AppCompatActivity {
         });
     }
 
-
+    //Metoda ce seteaza onClickListener pentru butonul de signup
     private void signUpOnClick(){
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Se preiau valorile introduse de utilizator
                 String name = signUpNameEditText.getText().toString().trim();
                 String mail = signUpMailEditText.getText().toString().trim();
                 String password = signUpPasswordEditText.getText().toString().trim();
 
+                //Daca unul din aceste input-uri este gol, nu se poate realiza inregistrarea
                 if (name.isEmpty() || mail.isEmpty() || password.isEmpty()) {
                     Toast.makeText(AuthActivity.this, "Complete all fields", Toast.LENGTH_SHORT).show();
                 }else{
-
+                    //Se creeaza o conexiune cu serverul de pe laptop
                     ConnectionClass connectionClass = new ConnectionClass();
                     Connection conn = connectionClass.CONN();
 
+                    //Se creeaza un executor care face interogarea in paralel(altfel se blocheaza interfata)
                     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
                     executorService.execute(() -> {
@@ -153,7 +171,7 @@ public class AuthActivity extends AppCompatActivity {
                                 checkRs.close();
                                 checkStmt.close();
 
-                                //Inseram userul
+                                //Inseram userul in baza de date
                                 String insertQuery = "INSERT INTO Users (Name, Email, Password) VALUES (?, ?, ?)";
                                 insertStmt = conn.prepareStatement(insertQuery);
                                 insertStmt.setString(1, name);
@@ -203,7 +221,6 @@ public class AuthActivity extends AppCompatActivity {
                             try {
                                 if (rs != null) rs.close();
                                 if (insertStmt != null) insertStmt.close();
-                                if (idStmt != null) idStmt.close();
                                 if (conn != null) conn.close();
                             } catch (Exception ex) {
                                 ex.printStackTrace();

@@ -212,9 +212,9 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                             throw new RuntimeException(e);
                         }
                     });
+                }else{
+                    Toast.makeText(CarListActivity.this, "All fields must be filled!", Toast.LENGTH_LONG).show();
                 }
-
-
 
                 recyclerView.setAdapter(adapter);
                 recyclerView.setLayoutManager(new LinearLayoutManager(CarListActivity.this));
