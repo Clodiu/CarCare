@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
@@ -136,7 +137,9 @@ public class AuthActivity extends AppCompatActivity {
                 //Daca unul din aceste input-uri este gol, nu se poate realiza inregistrarea
                 if (name.isEmpty() || mail.isEmpty() || password.isEmpty()) {
                     Toast.makeText(AuthActivity.this, "Complete all fields", Toast.LENGTH_SHORT).show();
-                }else{
+                }else if(!isValidEmail(mail)){
+                    Toast.makeText(AuthActivity.this, "Enter a valid email", Toast.LENGTH_SHORT).show();
+                } else{
                     //Se creeaza o conexiune cu serverul de pe laptop
                     ConnectionClass connectionClass = new ConnectionClass();
                     Connection conn = connectionClass.CONN();
@@ -237,6 +240,10 @@ public class AuthActivity extends AppCompatActivity {
         });
     }
 
+    private boolean isValidEmail(String email) {
+        return email != null && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
     private void logInOnClick(){
         //Adauga un listener pe buton, iar cand acesta este apasat preia textul din campurile de mail si parola
         logInButton.setOnClickListener(new View.OnClickListener() {
@@ -245,61 +252,65 @@ public class AuthActivity extends AppCompatActivity {
                 String mail = logInMailEditText.getText().toString().trim();
                 String password = logInPasswordEditText.getText().toString().trim();
 
-                ConnectionClass connectionClass = new ConnectionClass();
-                Connection conn = connectionClass.CONN();
+                if(!isValidEmail(mail)){
+                    Toast.makeText(AuthActivity.this, "Enter a valid email", Toast.LENGTH_SHORT).show();
+                }else {
+                    ConnectionClass connectionClass = new ConnectionClass();
+                    Connection conn = connectionClass.CONN();
 
-                ExecutorService executorService = Executors.newSingleThreadExecutor();
-                executorService.execute(() -> {
-                    PreparedStatement stmt = null;
-                    ResultSet rs = null;
+                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+                    executorService.execute(() -> {
+                        PreparedStatement stmt = null;
+                        ResultSet rs = null;
 
-                    try {
-                        if (conn == null) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(AuthActivity.this, "Problema de conexiune", Toast.LENGTH_LONG).show();
-                            });
-                        } else {
-                            String query = "SELECT User_ID FROM Users WHERE Email = ? AND Password = ?";
-                            stmt = conn.prepareStatement(query);
-                            stmt.setString(1, mail);
-                            stmt.setString(2, password);
-
-                            rs = stmt.executeQuery();
-
-                            if (rs.next()) {
-                                int userId = rs.getInt("User_ID");
-
+                        try {
+                            if (conn == null) {
                                 runOnUiThread(() -> {
-                                    // Porneste CarListActivity si salveaza userID
-                                    Intent intent = new Intent(AuthActivity.this, CarListActivity.class);
-                                    SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-                                    SharedPreferences.Editor editor = prefs.edit();
-                                    editor.putInt("USER_ID", userId);
-                                    editor.apply();
-                                    startActivity(intent);
-                                    finish();
+                                    Toast.makeText(AuthActivity.this, "Problema de conexiune", Toast.LENGTH_LONG).show();
                                 });
                             } else {
-                                runOnUiThread(() ->
-                                        Toast.makeText(AuthActivity.this, "Login failed: invalid credentials.", Toast.LENGTH_SHORT).show()
-                                );
+                                String query = "SELECT User_ID FROM Users WHERE Email = ? AND Password = ?";
+                                stmt = conn.prepareStatement(query);
+                                stmt.setString(1, mail);
+                                stmt.setString(2, password);
+
+                                rs = stmt.executeQuery();
+
+                                if (rs.next()) {
+                                    int userId = rs.getInt("User_ID");
+
+                                    runOnUiThread(() -> {
+                                        // Porneste CarListActivity si salveaza userID
+                                        Intent intent = new Intent(AuthActivity.this, CarListActivity.class);
+                                        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = prefs.edit();
+                                        editor.putInt("USER_ID", userId);
+                                        editor.apply();
+                                        startActivity(intent);
+                                        finish();
+                                    });
+                                } else {
+                                    runOnUiThread(() ->
+                                            Toast.makeText(AuthActivity.this, "Login failed: invalid credentials.", Toast.LENGTH_SHORT).show()
+                                    );
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runOnUiThread(() -> {
+                                Toast.makeText(AuthActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+                        } finally {
+                            try {
+                                if (rs != null) rs.close();
+                                if (stmt != null) stmt.close();
+                                if (conn != null) conn.close();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        runOnUiThread(() -> {
-                            Toast.makeText(AuthActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        });
-                    } finally {
-                        try {
-                            if (rs != null) rs.close();
-                            if (stmt != null) stmt.close();
-                            if (conn != null) conn.close();
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                });
+                    });
+                }
             }
         });
     }

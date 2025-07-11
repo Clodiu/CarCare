@@ -11,7 +11,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/settings_card_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="700dp"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
@@ -20,6 +20,10 @@
         app:cardElevation="10dp"
         android:backgroundTint="@color/background_tint_color"
         android:visibility="visible">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -38,7 +42,6 @@
             android:textColor="@color/primary_tint_color"
             android:textSize="36sp"
             android:textStyle="bold" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -189,7 +192,7 @@
 
             <Button
                 android:id="@+id/add_access"
-                android:layout_width="wrap_content"
+                android:layout_width="120dp"
                 android:layout_height="60dp"
                 android:backgroundTint="@color/primary_tint_color"
                 android:text="Add"
@@ -202,7 +205,7 @@
 
             <Button
                 android:id="@+id/remove_access"
-                android:layout_width="wrap_content"
+                android:layout_width="120dp"
                 android:layout_height="60dp"
                 android:backgroundTint="@color/primary_tint_color"
                 android:text="Remove"
@@ -220,7 +223,7 @@
             android:id="@+id/delete_car"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="50dp"
             android:text="Delete"
             android:textSize="18sp"
             android:backgroundTint="@color/primary_tint_color"
@@ -239,6 +242,8 @@
             android:layout_marginEnd="16dp"/>
 
     </LinearLayout>
+
+        </ScrollView>
 
     </androidx.cardview.widget.CardView>
 

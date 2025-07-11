@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,7 +129,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 String mail = emailInputText.getText().toString().trim();
 
-                if(!mail.isEmpty()){
+                if(!mail.isEmpty() && isValidEmail(mail)){
                     ExecutorService executorService = Executors.newSingleThreadExecutor();
                     executorService.execute(() -> {
                         ConnectionClass connectionClass = new ConnectionClass();
@@ -212,6 +213,8 @@ public class SettingsFragment extends Fragment {
                             }
                         }
                     });
+                }else{
+                    Toast.makeText(requireContext(), "Insert a valid email!", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -224,7 +227,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 String mail = emailInputText.getText().toString().trim();
 
-                if (!mail.isEmpty()) {
+                if (!mail.isEmpty() && isValidEmail(mail)) {
                     ExecutorService executorService = Executors.newSingleThreadExecutor();
                     executorService.execute(() -> {
                         ConnectionClass connectionClass = new ConnectionClass();
@@ -232,7 +235,7 @@ public class SettingsFragment extends Fragment {
 
                         if (conn == null) {
                             requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(), "Problema de conexiune", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(requireContext(), "Problema de conexiune", Toast.LENGTH_SHORT).show()
                             );
                             return;
                         }
@@ -255,7 +258,7 @@ public class SettingsFragment extends Fragment {
                                 targetUserId = rsUser.getInt("User_ID");
                             } else {
                                 requireActivity().runOnUiThread(() ->
-                                        Toast.makeText(requireContext(), "Email-ul nu a fost găsit!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(requireContext(), "Email-ul nu a fost găsit!", Toast.LENGTH_SHORT).show()
                                 );
                                 return;
                             }
@@ -273,7 +276,7 @@ public class SettingsFragment extends Fragment {
 
                             if (creatorId != userId) {
                                 requireActivity().runOnUiThread(() ->
-                                        Toast.makeText(requireContext(), "Nu ai voie sa modifici accesul acestei masini!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(requireContext(), "Nu ai voie sa modifici accesul acestei masini!", Toast.LENGTH_SHORT).show()
                                 );
                                 return;
                             }
@@ -299,7 +302,7 @@ public class SettingsFragment extends Fragment {
                         } catch (Exception e) {
                             e.printStackTrace();
                             requireActivity().runOnUiThread(() ->
-                                    Toast.makeText(requireContext(), "Eroare: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                                    Toast.makeText(requireContext(), "Eroare: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                             );
                         } finally {
                             try {
@@ -315,10 +318,14 @@ public class SettingsFragment extends Fragment {
                         }
                     });
                 } else {
-                    Toast.makeText(requireContext(), "Te rog să introduci un email!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Insert a valid email!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
 
