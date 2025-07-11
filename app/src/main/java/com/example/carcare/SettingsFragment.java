@@ -1,6 +1,7 @@
 package com.example.carcare;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -158,15 +159,15 @@ public class SettingsFragment extends Fragment {
                                 targetUserId = rsUser.getInt("User_ID");
                             } else {
                                 getActivity().runOnUiThread(() ->
-                                        Toast.makeText(getContext(), "Email-ul nu a fost găsit!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(getContext(), "Email-ul nu a fost gasit!", Toast.LENGTH_LONG).show()
                                 );
                                 return;
                             }
 
-                            //Verifică dacă user-ul curent este creatorul mașinii
+                            //Verifica daca user-ul curent este creatorul masinii
                             String creatorQuery = "SELECT Creator_ID FROM Cars WHERE Car_ID = ?";
                             creatorStmt = conn.prepareStatement(creatorQuery);
-                            creatorStmt.setInt(1, carId);  // Folosește ID-ul mașinii curente
+                            creatorStmt.setInt(1, carId);  // Foloseste ID-ul masinii curente
                             rsCreator = creatorStmt.executeQuery();
 
                             int creatorId = -1;
@@ -176,12 +177,12 @@ public class SettingsFragment extends Fragment {
 
                             if (creatorId != userId) {
                                 getActivity().runOnUiThread(() ->
-                                        Toast.makeText(getContext(), "Nu ai voie să oferi acces la această mașină!", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(getContext(), "Nu ai voie să oferi acces la această masina!", Toast.LENGTH_LONG).show()
                                 );
                                 return;
                             }
 
-                            //Inserează perechea în UserCarAccess
+                            //Insereaza perechea in UserCarAccess
                             String accessQuery = "INSERT INTO UserCarAccess (User_ID, Car_ID) VALUES (?, ?)";
                             insertAccessStmt = conn.prepareStatement(accessQuery);
                             insertAccessStmt.setInt(1, targetUserId);
@@ -190,7 +191,7 @@ public class SettingsFragment extends Fragment {
                             insertAccessStmt.executeUpdate();
 
                             getActivity().runOnUiThread(() ->
-                                    Toast.makeText(getContext(), "Acces adăugat cu succes!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(getContext(), "Acces adaugat cu succes!", Toast.LENGTH_SHORT).show()
                             );
 
                         } catch (Exception e) {
@@ -321,14 +322,107 @@ public class SettingsFragment extends Fragment {
     }
 
 
-    private void deleteCarButtonSetUp(){
+    private void deleteCarButtonSetUp() {
         deleteCarButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Ai apasat pe butonul de stergere masina", Toast.LENGTH_LONG).show();
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.execute(() -> {
+                    ConnectionClass connectionClass = new ConnectionClass();
+                    Connection conn = connectionClass.CONN();
+
+                    if (conn == null) {
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(), "Problema de conexiune", Toast.LENGTH_LONG).show()
+                        );
+                        return;
+                    }
+
+                    PreparedStatement creatorStmt = null;
+                    PreparedStatement deleteNotesStmt = null;
+                    PreparedStatement deleteAccessStmt = null;
+                    PreparedStatement deleteCarStmt = null;
+                    ResultSet rsCreator = null;
+
+                    try {
+                        //Verifica daca user-ul curent este creatorul masinii
+                        String creatorQuery = "SELECT Creator_ID FROM Cars WHERE Car_ID = ?";
+                        creatorStmt = conn.prepareStatement(creatorQuery);
+                        creatorStmt.setInt(1, carId); // ID-ul mașinii curente
+                        rsCreator = creatorStmt.executeQuery();
+
+                        int creatorId = -1;
+                        if (rsCreator.next()) {
+                            creatorId = rsCreator.getInt("Creator_ID");
+                        }
+
+                        if (creatorId != userId) {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Nu ai voie să ștergi această mașină!", Toast.LENGTH_LONG).show()
+                            );
+                            return;
+                        }
+
+                        //Sterge notele masinii
+                        String deleteNotesQuery = "DELETE FROM Notes WHERE Car_ID = ?";
+                        deleteNotesStmt = conn.prepareStatement(deleteNotesQuery);
+                        deleteNotesStmt.setInt(1, carId);
+                        deleteNotesStmt.executeUpdate();
+
+                        //Sterge accesul tuturor userilor
+                        String deleteAccessQuery = "DELETE FROM UserCarAccess WHERE Car_ID = ?";
+                        deleteAccessStmt = conn.prepareStatement(deleteAccessQuery);
+                        deleteAccessStmt.setInt(1, carId);
+                        deleteAccessStmt.executeUpdate();
+
+                        //sterge masina
+                        String deleteCarQuery = "DELETE FROM Cars WHERE Car_ID = ?";
+                        deleteCarStmt = conn.prepareStatement(deleteCarQuery);
+                        deleteCarStmt.setInt(1, carId);
+                        int rowsAffected = deleteCarStmt.executeUpdate();
+
+                        if (rowsAffected > 0) {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Mașina a fost ștearsă cu succes!", Toast.LENGTH_SHORT).show()
+                            );
+
+                            //Inchiderea filei existente de CarListActivity si redeschiderea uneia noi(pentru a reincarca lista)
+                            requireActivity().runOnUiThread(() -> {
+                                Intent intent = new Intent(requireContext(), CarListActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+
+                                //Se inchide si activitatea curenta
+                                requireActivity().finish();
+                            });
+                        } else {
+                            requireActivity().runOnUiThread(() ->
+                                    Toast.makeText(requireContext(), "Nu s-a putut șterge mașina!", Toast.LENGTH_SHORT).show()
+                            );
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        requireActivity().runOnUiThread(() ->
+                                Toast.makeText(requireContext(), "Eroare la ștergere: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                        );
+                    } finally {
+                        try {
+                            if (rsCreator != null) rsCreator.close();
+                            if (creatorStmt != null) creatorStmt.close();
+                            if (deleteNotesStmt != null) deleteNotesStmt.close();
+                            if (deleteAccessStmt != null) deleteAccessStmt.close();
+                            if (deleteCarStmt != null) deleteCarStmt.close();
+                            if (conn != null) conn.close();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
             }
-        });;
+        });
     }
+
 
     private void loadUserAndEmailFromDataBase(){
         ConnectionClass connectionClass = new ConnectionClass();
