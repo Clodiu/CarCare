@@ -54,12 +54,16 @@ import java.util.Locale;
  */
 public class AICamFragment extends Fragment {
 
+    //Imaginea capturata din camera
     private ImageView cameraImage;
 
+    //Textul rezultat din OCR
     private TextInputEditText resultText;
 
+    //Calea catre fotografia curenta
     private String currentPhotoPath;
 
+    //Launchers pentru permisiuni si captura de imagine
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Uri> takePictureLauncher;
 
@@ -114,6 +118,7 @@ public class AICamFragment extends Fragment {
         resultText = view.findViewById(R.id.input_text);
         Button copyTextBtn = view.findViewById(R.id.copy_button);
 
+        //Initializarea launcher pentru cerere permisiune camera
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -131,12 +136,16 @@ public class AICamFragment extends Fragment {
                 }
         );
 
+        //Initializarea launcher pentru captura imagine
         takePictureLauncher  = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 success ->{
                     if(success){
                         if(currentPhotoPath != null){
+                            //Decodarea imaginii din fisier
                             Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+
+                            //Verificam orientarea din exif si rotim daca e necesar
                             ExifInterface exif = null;
                             try {
                                 exif = new ExifInterface(currentPhotoPath);
@@ -169,6 +178,7 @@ public class AICamFragment extends Fragment {
                 }
         );
 
+        //Buton pentru a captura imaginea
         captureImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,6 +186,7 @@ public class AICamFragment extends Fragment {
             }
         });
 
+        //Buton pentru copiere text in clipboard
         copyTextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,6 +213,7 @@ public class AICamFragment extends Fragment {
         return view;
     }
 
+    //Metoda pentru rotirea unei imagini
     public static Bitmap rotateImage(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
@@ -210,6 +222,7 @@ public class AICamFragment extends Fragment {
         );
     }
 
+    //Metoda care creeaza temporar un fisier pentru imagine
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -223,6 +236,7 @@ public class AICamFragment extends Fragment {
         return image;
     }
 
+    //Lanseaza intent pentru captura imaginii
     private void captureImage() throws IOException {
         File photoFile = null;
 
@@ -243,6 +257,7 @@ public class AICamFragment extends Fragment {
         }
     }
 
+    //Recunoasterea textului din imagine folosind ML Kit
     private void recognizeText(Bitmap bitmap){
         InputImage image = InputImage.fromBitmap(bitmap,180);
         TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
@@ -267,6 +282,7 @@ public class AICamFragment extends Fragment {
                 });
     }
 
+    //Scoate focusul de pe input text cand tastatura dispare
     private void initNoFocusInputTextWhenNoKeyboard(){
         mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             private int previousHeightDiff = 0;
