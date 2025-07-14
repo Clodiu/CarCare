@@ -251,6 +251,7 @@ public class CarHistoryActivity extends AppCompatActivity{
 
                                 //Thread UI pentru update
                                 runOnUiThread(() -> {
+                                    updateLastServicedFromLatestNote();
                                     HomeFragment homeFragment = (HomeFragment) pagerAdapter.getFragment(0);
                                     if (homeFragment != null) {
                                         homeFragment.loadNotesFromDatabase(); //reactualizam notitele pentru a o contine si pe cea nou adaugata
@@ -312,6 +313,45 @@ public class CarHistoryActivity extends AppCompatActivity{
                     }
                 }
                 previousHeightDiff = heightDiff;
+            }
+        });
+    }
+
+    private void updateLastServicedFromLatestNote() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            ConnectionClass connectionClass = new ConnectionClass();
+            Connection conn = connectionClass.CONN();
+
+            if (conn != null) {
+                try {
+                    //Ia cea mai recenta notita dupa Data DESC
+                    String query = "SELECT TOP 1 Date FROM Notes WHERE Car_ID = ? ORDER BY Date DESC";
+                    java.sql.PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, carId);
+
+                    java.sql.ResultSet rs = pstmt.executeQuery();
+
+                    if (rs.next()) {
+                        java.sql.Date latestDate = rs.getDate("Date");
+
+                        //Update Cars.LastServiced
+                        String updateQuery = "UPDATE Cars SET LastServiced = ? WHERE Car_ID = ?";
+                        java.sql.PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                        updateStmt.setDate(1, latestDate);
+                        updateStmt.setInt(2, carId);
+                        updateStmt.executeUpdate();
+
+                        updateStmt.close();
+
+                    }
+
+                    rs.close();
+                    pstmt.close();
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

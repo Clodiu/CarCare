@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 public class NoteViewActivity extends AppCompatActivity {
 
     private int noteID;
+    private int carId = 1005;
 
     private Note currentNote;
 
@@ -61,6 +62,7 @@ public class NoteViewActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         noteID = prefs.getInt("NOTE_ID", -1);
+        carId = prefs.getInt("CAR_ID", -1);
 
         loadNote();
 
@@ -165,6 +167,7 @@ public class NoteViewActivity extends AppCompatActivity {
                                     Intent resultIntent = new Intent();
                                     resultIntent.putExtra("note_deleted", true);
                                     setResult(RESULT_OK, resultIntent);
+                                    updateLastServicedFromLatestNote();
                                     finish(); // sau folosește Intent dacă vrei să-l forțezi
                                     // startActivity(new Intent(NoteViewActivity.this, CarHistoryActivity.class));
                                 });
@@ -248,6 +251,45 @@ public class NoteViewActivity extends AppCompatActivity {
             descTextView.setText(currentNote.getDescription());
             kmTextView.setText(String.valueOf(currentNote.getKilometers()));
             dateTextView.setText(currentNote.getDate());
+        });
+    }
+
+    private void updateLastServicedFromLatestNote() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -> {
+            ConnectionClass connectionClass = new ConnectionClass();
+            Connection conn = connectionClass.CONN();
+
+            if (conn != null) {
+                try {
+                    //Ia cea mai recenta notita dupa Data DESC
+                    String query = "SELECT TOP 1 Date FROM Notes WHERE Car_ID = ? ORDER BY Date DESC";
+                    java.sql.PreparedStatement pstmt = conn.prepareStatement(query);
+                    pstmt.setInt(1, carId);
+
+                    java.sql.ResultSet rs = pstmt.executeQuery();
+
+                    if (rs.next()) {
+                        java.sql.Date latestDate = rs.getDate("Date");
+
+                        //Update Cars.LastServiced
+                        String updateQuery = "UPDATE Cars SET LastServiced = ? WHERE Car_ID = ?";
+                        java.sql.PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+                        updateStmt.setDate(1, latestDate);
+                        updateStmt.setInt(2, carId);
+                        updateStmt.executeUpdate();
+
+                        updateStmt.close();
+
+                    }
+
+                    rs.close();
+                    pstmt.close();
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 }

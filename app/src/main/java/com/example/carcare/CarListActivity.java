@@ -35,6 +35,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
@@ -411,8 +412,12 @@ public class CarListActivity extends AppCompatActivity implements CarRecyclerVie
                         String model = rs.getString("Model");
                         String registerPlate = rs.getString("RegisterPlate");
                         int creatorId = rs.getInt("Creator_ID");
+                        Date date = rs.getDate("LastServiced");
 
-                        userCars.add(new Car(carId,manufacturer,model,registerPlate, "Never",creatorId));
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                        String dateString = formatter.format(date);
+
+                        userCars.add(new Car(carId,manufacturer,model,registerPlate, dateString,creatorId));
                     }
 
                     conn.close();
