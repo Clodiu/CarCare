@@ -3,6 +3,7 @@ package com.example.carcare;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,7 +13,10 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +40,7 @@ import java.util.concurrent.Executors;
  */
 public class SettingsFragment extends Fragment {
 
+    private RelativeLayout mainLayout;
     private int userId;
     private int carId;
 
@@ -104,6 +109,7 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        mainLayout = view.findViewById(R.id.main);
         addAccesButton = view.findViewById(R.id.add_access);
         removeAccessButton = view.findViewById(R.id.remove_access);
         deleteCarButton = view.findViewById(R.id.delete_car);
@@ -120,6 +126,7 @@ public class SettingsFragment extends Fragment {
         loadUserAndEmailFromDataBase();
         addAccessButtonSetUp();
         removeAccessButtonSetUp();
+        initNoFocusInputTextWhenNoKeyboard();
         return view;
     }
 
@@ -481,6 +488,36 @@ public class SettingsFragment extends Fragment {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+            }
+        });
+    }
+
+    private void initNoFocusInputTextWhenNoKeyboard(){
+        mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            private int previousHeightDiff = 0;
+
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                mainLayout.getWindowVisibleDisplayFrame(r);
+                int screenHeight = mainLayout.getRootView().getHeight();
+
+                int heightDiff = screenHeight - r.height();
+
+                // Dacă diferența e mare, înseamnă că tastatura e afișată
+                // Dacă diferența scade, tastatura s-a ascuns
+                if (previousHeightDiff > heightDiff) {
+                    // Tastatura tocmai s-a închis
+                    // Scoatem focusul și ascundem tastatura (de precauție)
+                    if (emailInputText.hasFocus()) {
+                        emailInputText.clearFocus();
+                        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.hideSoftInputFromWindow(emailInputText.getWindowToken(), 0);
+                        }
+                    }
+                }
+                previousHeightDiff = heightDiff;
             }
         });
     }

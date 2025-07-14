@@ -245,7 +245,7 @@ public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
                 }else{
                     stmt = conn.createStatement();
 
-                    String query = "SELECT * FROM Notes WHERE Car_ID = "+carId;
+                    String query = "SELECT * FROM Notes WHERE Car_ID = "+carId + "ORDER BY Kilometers DESC";
 
                     rs = stmt.executeQuery(query);
 

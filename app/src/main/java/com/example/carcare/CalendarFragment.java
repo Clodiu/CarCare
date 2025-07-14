@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -198,7 +197,6 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
 
     @Override
     public void onItemClick(int position) {
-        Toast.makeText(getContext(), "Ai apasat din calendar fragment boss", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(getContext(), NoteViewActivity.class);
         startActivity(intent);
     }

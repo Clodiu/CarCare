@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -130,9 +131,9 @@ public class AuthActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Se preiau valorile introduse de utilizator
-                String name = signUpNameEditText.getText().toString().trim();
-                String mail = signUpMailEditText.getText().toString().trim();
-                String password = signUpPasswordEditText.getText().toString().trim();
+                String name = Objects.requireNonNull(signUpNameEditText.getText()).toString().trim();
+                String mail = Objects.requireNonNull(signUpMailEditText.getText()).toString().trim();
+                String password = Objects.requireNonNull(signUpPasswordEditText.getText()).toString().trim();
 
                 //Daca unul din aceste input-uri este gol, nu se poate realiza inregistrarea
                 if (name.isEmpty() || mail.isEmpty() || password.isEmpty()) {
@@ -249,8 +250,8 @@ public class AuthActivity extends AppCompatActivity {
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mail = logInMailEditText.getText().toString().trim();
-                String password = logInPasswordEditText.getText().toString().trim();
+                String mail = Objects.requireNonNull(logInMailEditText.getText()).toString().trim();
+                String password = Objects.requireNonNull(logInPasswordEditText.getText()).toString().trim();
 
                 if(!isValidEmail(mail)){
                     Toast.makeText(AuthActivity.this, "Enter a valid email", Toast.LENGTH_SHORT).show();

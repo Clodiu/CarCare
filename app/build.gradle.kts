@@ -49,4 +49,5 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation("net.sourceforge.jtds:jtds:1.3.1")
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

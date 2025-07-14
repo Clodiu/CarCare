@@ -30,7 +30,7 @@ public class MyPagerAdapter extends FragmentStateAdapter {
                 fragment = new CalendarFragment();
                 break;
             case 2:
-                fragment = new SettingsFragment();
+                fragment = new AICamFragment();
                 break;
             case 3:
                 fragment = new SettingsFragment();
