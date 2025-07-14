@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,12 @@ import android.widget.Toast;
 
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
+import com.example.carcare.connection.ConnectionClass;
+import com.example.carcare.adapters.NoteList_RecyclerViewAdapter;
+import com.example.carcare.interfaces.NoteRecyclerViewInterface;
+import com.example.carcare.NoteViewActivity;
+import com.example.carcare.R;
+import com.example.carcare.classes.Note;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -28,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CalendarFragment extends Fragment implements NoteRecyclerViewInterface{
+public class CalendarFragment extends Fragment implements NoteRecyclerViewInterface {
 
     //Variabila in care incarcam id-ul salvat al masinii pe care am dat click
     private int carId;
@@ -131,7 +137,7 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
     }
 
     //Adaugarea datelor in care exista inregistrari de note pentru masina curenta
-    void setUpHighlightedDays(){
+    public void setUpHighlightedDays(){
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
             ConnectionClass connectionClass = new ConnectionClass();
@@ -181,7 +187,7 @@ public class CalendarFragment extends Fragment implements NoteRecyclerViewInterf
     }
 
     //Metoda care preia data pe care utilizatorul o apasa si incarca notitele din acea zi
-    void setOnDayClick(){
+    public void setOnDayClick(){
         calendarView.setOnDayClickListener(eventDay -> {
             Calendar clickedDay = eventDay.getCalendar();
 

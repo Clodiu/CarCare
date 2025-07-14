@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoadingActivity"
+    android:background="@color/background_tint_color"
+    android:backgroundTint="@color/background_tint_color">
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/wave"
+        android:backgroundTint="@color/primary_tint_color"
+        android:alpha="0.6"/>
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/wave"
+        android:backgroundTint="@color/primary_tint_color"
+        android:alpha="0.4"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/wave"
+        android:backgroundTint="@color/primary_tint_color"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/headerLayout">
+        <ImageView
+            android:id="@+id/elevatorCarLogo"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/elevator_car_logo"
+            android:layout_gravity="center_horizontal|top"
+            android:backgroundTint="@color/icon_tint_color"/>
+        <TextView
+            android:id="@+id/appName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CarCare"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_below="@id/headerLayout"
+        android:layout_marginTop="20dp">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:indeterminateTint="@color/primary_tint_color">
+
+        </ProgressBar>
+
+    </RelativeLayout>
+
+</RelativeLayout>

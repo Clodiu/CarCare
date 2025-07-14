@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.classes;
 
 public class Car {
     int carId;

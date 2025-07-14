@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".AICamFragment"
+    tools:context=".fragments.AICamFragment"
     android:id="@+id/main"
     android:backgroundTint="@color/background_tint_color"
     android:background="@color/background_tint_color">
@@ -76,7 +76,7 @@
             android:layout_height="300dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:hint="Here you will see the text"
+            android:hint="Edit information before adding to note"
             app:boxCornerRadiusBottomEnd="10dp"
             app:boxCornerRadiusBottomStart="10dp"
             app:boxCornerRadiusTopEnd="10dp"
@@ -88,7 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:inputType="textMultiLine"
-                android:textIsSelectable="true"/>
+                android:textIsSelectable="true"
+                android:gravity="top|start"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
@@ -96,7 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_margin="16dp"
-            android:text="Copy Text"
+            android:text="Add to note"
             android:textSize="18sp"
             android:backgroundTint="@color/primary_tint_color"
             app:cornerRadius = "10dp"

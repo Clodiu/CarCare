@@ -27,6 +27,10 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.carcare.adapters.CarList_RecyclerViewAdapter;
+import com.example.carcare.classes.Car;
+import com.example.carcare.connection.ConnectionClass;
+import com.example.carcare.interfaces.CarRecyclerViewInterface;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -40,9 +44,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class CarListActivity extends AppCompatActivity implements CarRecyclerViewInterface{
+public class CarListActivity extends AppCompatActivity implements CarRecyclerViewInterface {
 
     private Button logOutButton;
     private CardView settingsCardView;

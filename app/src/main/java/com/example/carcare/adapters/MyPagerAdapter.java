@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.adapters;
 
 import android.util.SparseArray;
 
@@ -6,6 +6,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.example.carcare.fragments.AICamFragment;
+import com.example.carcare.fragments.CalendarFragment;
+import com.example.carcare.fragments.HomeFragment;
+import com.example.carcare.fragments.SettingsFragment;
 
 //Un adaptor de stare pentru fragmentele din CarHistoryActivity care se foloseste de pozitia iconitei selectate
 //pentru a crea fragmentul corespunzator

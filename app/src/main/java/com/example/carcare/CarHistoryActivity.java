@@ -10,6 +10,7 @@ import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -20,6 +21,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.carcare.adapters.MyPagerAdapter;
+import com.example.carcare.connection.ConnectionClass;
+import com.example.carcare.fragments.CalendarFragment;
+import com.example.carcare.fragments.HomeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -206,11 +211,12 @@ public class CarHistoryActivity extends AppCompatActivity{
             public void onClick(View v) {
                 String title = titleEditText.getText().toString().trim();
                 String description = descriptionEditText.getText().toString().trim();
-                int kilometers = Integer.parseInt(kmEditText.getText().toString().trim());
+                String km = kmEditText.getText().toString().trim();
                 CharSequence buttonText = dateButton.getText();
                 String date = (buttonText != null) ? buttonText.toString().trim() : "No date selected";
 
-                if(!title.isEmpty()){
+                if(!title.isEmpty() && !km.isEmpty()){
+                    int kilometers = Integer.parseInt(km);
                     ConnectionClass connectionClass = new ConnectionClass();
                     Connection conn = connectionClass.CONN();
                     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -271,6 +277,8 @@ public class CarHistoryActivity extends AppCompatActivity{
 
 
 
+                }else{
+                    Toast.makeText(CarHistoryActivity.this,"Make sure to complete all the fields.",Toast.LENGTH_SHORT).show();
                 }
                 titleEditText.setText("");
                 descriptionEditText.setText("");

@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.fragments;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +23,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.carcare.connection.ConnectionClass;
+import com.example.carcare.adapters.NoteList_RecyclerViewAdapter;
+import com.example.carcare.interfaces.NoteRecyclerViewInterface;
+import com.example.carcare.NoteViewActivity;
+import com.example.carcare.R;
+import com.example.carcare.classes.Note;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.sql.Connection;
@@ -40,7 +45,7 @@ import java.util.concurrent.Executors;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements NoteRecyclerViewInterface{
+public class HomeFragment extends Fragment implements NoteRecyclerViewInterface {
 
     private int carId = 1005;
 

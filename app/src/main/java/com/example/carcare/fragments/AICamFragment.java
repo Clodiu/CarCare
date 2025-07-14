@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.fragments;
 
 import static androidx.core.content.ContextCompat.getSystemService;
 
@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.carcare.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -201,7 +202,7 @@ public class AICamFragment extends Fragment {
                     clipboard.setPrimaryClip(clip);
                     Toast.makeText(
                             requireContext().getApplicationContext(),
-                            "Text Copied",
+                            "Text copied in clipboard!",
                             Toast.LENGTH_SHORT
                     ).show();
                 }

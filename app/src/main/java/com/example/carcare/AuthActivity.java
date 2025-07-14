@@ -21,6 +21,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.carcare.connection.ConnectionClass;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -68,20 +69,6 @@ public class AuthActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        //Se incarca din mmemorie din MyAppPrefs campul USER_ID pentru a verifica daca deja a exitat o logare in trecut
-        //In principiu daca exista salvat un user_id acolo, functioneaza ca un remember-me
-        SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
-        int savedUserId = prefs.getInt("USER_ID", -1);
-
-        //Daca savedUserId e diferit de -1 inseamna ca am fost conectat in trecut, deci dam skip la pagina de autentificare
-        if (savedUserId != -1) {
-            // Exista un user logat - mergi direct in CarListActivity
-            Intent intent = new Intent(AuthActivity.this, CarListActivity.class);
-            intent.putExtra("USER_ID", savedUserId);
-            startActivity(intent);
-            finish();
-        }
 
         //Setam manual culoarea barii de notificare
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_tint_color));

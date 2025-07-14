@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.carcare.interfaces.NoteRecyclerViewInterface;
+import com.example.carcare.R;
+import com.example.carcare.classes.Note;
 
 import java.util.ArrayList;
 

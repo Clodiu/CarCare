@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +7,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -20,16 +19,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.carcare.CarListActivity;
+import com.example.carcare.connection.ConnectionClass;
+import com.example.carcare.R;
 import com.google.android.material.textfield.TextInputEditText;
 
-import org.w3c.dom.Text;
-
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

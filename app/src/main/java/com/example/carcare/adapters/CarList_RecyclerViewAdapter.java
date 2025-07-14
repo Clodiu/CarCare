@@ -1,4 +1,4 @@
-package com.example.carcare;
+package com.example.carcare.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,9 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.carcare.interfaces.CarRecyclerViewInterface;
+import com.example.carcare.R;
+import com.example.carcare.classes.Car;
+
 import java.util.ArrayList;
 
-class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerViewAdapter.MyViewHolder> {
+public class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerViewAdapter.MyViewHolder> {
 
     private final CarRecyclerViewInterface recyclerViewInterface;
     private Context context;
