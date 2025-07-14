@@ -364,4 +364,8 @@ public class CarHistoryActivity extends AppCompatActivity{
         });
     }
 
+    public void navigateToHomeFragment() {
+        viewPager.setCurrentItem(0, true); // indexul 0 = HomeFragment
+    }
+
 }

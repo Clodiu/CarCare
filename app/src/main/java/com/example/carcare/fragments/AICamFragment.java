@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.carcare.CarHistoryActivity;
 import com.example.carcare.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -205,6 +206,9 @@ public class AICamFragment extends Fragment {
                             "Text copied in clipboard!",
                             Toast.LENGTH_SHORT
                     ).show();
+
+                    CarHistoryActivity activity = (CarHistoryActivity) requireActivity();
+                    activity.navigateToHomeFragment();
                 }
             }
         });
