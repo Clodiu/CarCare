@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class ConnectionClass {
     String classes = "net.sourceforge.jtds.jdbc.Driver";
 
-    protected static String ip = "192.168.162.9";//Trebuie schimbat in functie de retea pe private si sa fie adresa laptopului din ipconfig
+    protected static String ip = "192.168.101.9";//Trebuie schimbat in functie de retea pe private si sa fie adresa laptopului din ipconfig
 
     protected static String port = "1433";
 

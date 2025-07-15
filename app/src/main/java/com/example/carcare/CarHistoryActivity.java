@@ -318,6 +318,12 @@ public class CarHistoryActivity extends AppCompatActivity{
                         if (imm != null) {
                             imm.hideSoftInputFromWindow(descriptionEditText.getWindowToken(), 0);
                         }
+                    } else if (kmEditText.hasFocus()){
+                        kmEditText.clearFocus();
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.hideSoftInputFromWindow(kmEditText.getWindowToken(), 0);
+                        }
                     }
                 }
                 previousHeightDiff = heightDiff;
