@@ -1,5 +1,6 @@
 package com.example.carcare.classes;
 
+//Clasa care implementeaza un rand din tabela Notes sub forma de obiect in cod
 public class Note {
     int note_ID;
     String title;

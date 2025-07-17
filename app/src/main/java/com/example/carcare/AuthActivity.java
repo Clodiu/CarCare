@@ -228,6 +228,7 @@ public class AuthActivity extends AppCompatActivity {
         });
     }
 
+    //Metoda care verifica daca un email are forma valida
     private boolean isValidEmail(String email) {
         return email != null && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }

@@ -79,6 +79,7 @@ public class CarHistoryActivity extends AppCompatActivity{
                 android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         );
 
+        //Preia userId si carId din memoria interna
         SharedPreferences prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         userId = prefs.getInt("USER_ID", -1);
         carId = prefs.getInt("CAR_ID", -1);
@@ -154,6 +155,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         initNoFocusSearchbarWhenNoKeyboard();
     }
 
+    //Functie care preia data de azi si o returneaza ca string
     private String getTodaysDate(){
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
@@ -163,6 +165,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         return makeDateString(day,month,year);
     }
 
+    //Functia care seteaza date picker ul pentru notita
     private void initDatePicker() {
         DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -182,6 +185,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
     }
 
+    //Metoda care deschide date picker
     public void openDatePicker(View view){
         datePickerDialog.show();
     }
@@ -190,6 +194,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         return day+"-"+month+"-"+year;
     }
 
+    //Metoda ce seteaza butonul de add ca sa deschida formularul de adaugare al unei notite
     private void setUpAddButton(){
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,6 +210,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         });
     }
 
+    //Metoda ce seteaza butonul de save si face verificarile datelor introduse
     private void setUpSaveButton(){
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -288,6 +294,9 @@ public class CarHistoryActivity extends AppCompatActivity{
         });
     }
 
+    //Metoda folosita in toate activitatile pentru a scoate focusul de pe InputText atunci cand
+    // tastatura se inchide. Search-bar-urile din proiect sunt tot campuri de tip InputText pe care
+    // le-am facut sa se comporte search-uri cu un delay de cautare
     private void initNoFocusSearchbarWhenNoKeyboard(){
         mainLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             private int previousHeightDiff = 0;
@@ -331,6 +340,7 @@ public class CarHistoryActivity extends AppCompatActivity{
         });
     }
 
+    //Metoda care actualizează ultima data in care masina are o notita inregistrata
     private void updateLastServicedFromLatestNote() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
@@ -370,6 +380,9 @@ public class CarHistoryActivity extends AppCompatActivity{
         });
     }
 
+    //Metoda care face o navigare fortata la fragmentul Home
+    //folosita in AI Camera pentru a sugera o posibila editare sau adaugare de nota
+    //in momentul in care se copiaza textul extras din imagine
     public void navigateToHomeFragment() {
         viewPager.setCurrentItem(0, true); // indexul 0 = HomeFragment
     }

@@ -1,5 +1,7 @@
 package com.example.carcare.classes;
 
+
+//Clasa care implementeaza un rand din tabela Cars sub forma de obiect in cod
 public class Car {
     int carId;
     String manufacturer;

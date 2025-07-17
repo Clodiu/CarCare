@@ -15,6 +15,8 @@ import com.example.carcare.classes.Note;
 
 import java.util.ArrayList;
 
+//Clasa care implementeaza transformarea din lista de notite in lista din recycler view pentru vizualizare
+
 public class NoteList_RecyclerViewAdapter extends RecyclerView.Adapter<NoteList_RecyclerViewAdapter.MyViewHolder> {
 
     private final NoteRecyclerViewInterface recyclerViewInterface;

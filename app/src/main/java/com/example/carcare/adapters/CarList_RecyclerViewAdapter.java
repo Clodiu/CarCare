@@ -15,6 +15,8 @@ import com.example.carcare.classes.Car;
 
 import java.util.ArrayList;
 
+//Clasa care implementeaza transformarea din lista de masini in lista din recycler view pentru vizualizare
+
 public class CarList_RecyclerViewAdapter extends RecyclerView.Adapter<CarList_RecyclerViewAdapter.MyViewHolder> {
 
     private final CarRecyclerViewInterface recyclerViewInterface;
