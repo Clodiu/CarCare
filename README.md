@@ -27,16 +27,7 @@
 
 ## 🛠️ Tehnologii folosite
 
-- **Limbaj:** Kotlin / Java  
+- **Limbaj:** Java  
 - **Mediu de dezvoltare:** Android Studio  
-- **Arhitectură propusă:** MVVM  
-- **Bază de date:** Room / Firebase (în funcție de implementare)  
-- **Altele:** Material Design, LiveData, ViewModel
-
----
-
-## 📦 Instalare
-
-1. Clonează repository-ul:
-   ```bash
-   git clone https://github.com/utilizatorul-tau/CarCare.git
+- **Bază de date:** Microsoft SQL Server
+- **Altele:** Material Design, ML Kit Text Recognition
