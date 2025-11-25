@@ -5,7 +5,8 @@
 
 **CarCare** este o aplicație mobilă dezvoltată în Android Studio, concepută pentru a facilita gestionarea și urmărirea mentenanței vehiculelor. Fie că ești proprietar al unei mașini personale sau administrezi o flotă, CarCare îți oferă un mod simplu și eficient de a ține evidența lucrărilor de întreținere.
 
-![1-SignUp](https://github.com/user-attachments/assets/abdc9cb8-cfa2-42f1-92fd-c4cd9467008b)
+![1-SignUp](https://github.com/user-attachments/assets/abdc9cb8-cfa2-42f1-92fd-c4cd9467008b)![3-CarList](https://github.com/user-attachments/assets/259f579f-a99a-466b-b9e2-33dd5de58776)
+
 
 
 ## 👤 Cui se adresează?
@@ -13,8 +14,6 @@
 - Utilizatorilor individuali care doresc să țină evidența întreținerii vehiculului propriu
 - Deținătorilor sau administratorilor de flote auto
 - Persoanelor care doresc să partajeze istoricul mentenanței cu alți utilizatori (ex. service-uri, colegi de flotă, membri ai familiei)
-
-![3-CarList](https://github.com/user-attachments/assets/ce973f15-1f3c-4962-a6f1-d864cdaf4477)
 
 
 ## ⚙️ Ce oferă aplicația?
@@ -25,9 +24,6 @@
 - Interfață intuitivă și ușor de utilizat
 - Posibilitatea de a gestiona mai multe vehicule
 
-![8-CalendarPage](https://github.com/user-attachments/assets/e4f53595-a90f-429d-9c23-4c4a372eaede)
-
-![9-AiPic](https://github.com/user-attachments/assets/9b449a7b-7b81-4f05-bf4b-3d7c8ec90fb5)
 
 ## 🛠️ Tehnologii folosite
 
