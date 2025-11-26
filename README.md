@@ -1,3 +1,5 @@
+# Aplicatie realizata in 3 săptămâni
+
 # CarCare 🚗🛠️  
 **Aplicație Android pentru gestionarea istoricului de mentenanță al vehiculelor**
 
